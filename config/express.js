@@ -19,7 +19,8 @@ module.exports = function () {
     /* App (Android, iOS) */
     // TODO: 도메인을 추가할 경우 이곳에 Route를 추가하세요.
     require('../src/app/User/userRoute')(app);
-    // require('../src/app/Board/boardRoute')(app);
+    // 음악관련 도메인 처리
+    require('../src/app/Music/musicRoute')(app);
 
     return app;
 };

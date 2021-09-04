@@ -1,18 +1,51 @@
+const user = require("./userController");
 module.exports = function(app){
     const user = require('./userController');
     const jwtMiddleware = require('../../../config/jwtMiddleware');
 
     // 0. 테스트 API
-    // app.get('/app/test', user.getTest)
+    app.get('/test', user.getTest);
 
     // 1. 유저 생성 (회원가입) API
-    app.post('/app/users', user.postUsers);
+    app.post('/users', user.postUsers);
 
     // 2. 유저 조회 API (+ 검색)
-    app.get('/app/users',user.getUsers); 
+    app.get('/users',user.getUsers);
 
     // 3. 특정 유저 조회 API
-    app.get('/app/users/:userId', user.getUserById);
+    app.get('/users/:userId', user.getUserById);
+
+    // // 3-1. 특정 유저 조회 API TEST
+    // app.get('/app/users/:userId', user.getUserById2);
+
+    // 4. 회원탈퇴
+    app.delete('/users/:userId', user.deleteUserById);
+
+    // 5. 아이디 찾기
+    app.post('/users/id', user.searchUserID);
+
+    // 6. 특정 유저 댓글 조회
+    app.get('/users/:userId/comments',user.getComment);
+
+    // 7. 특정 유저 플레이리스트 조회
+    app.get('/users/:userId/playlists',user.getPlaylist);
+
+    // 8. 특정 유저 좋아하는 음악 조회
+    app.get('/users/:userId/likes', user.getLikeMusic);
+
+    // 9. 특정 유저 최근 들은 음악 조회
+    app.get('/users/:userId/streaming-history', user.getStreamingHistory);
+
+    // 10. 회원 정보 수정
+    app.post('/users/:userId/update',user.updateUserInfo);
+
+    // 11. 회원 아이디 변경
+    app.post('/users/:userId/id',user.updateUserID);
+
+    // 12. 특정 유저 팔로우한 가수 목록 조회
+    app.get('/users/:userId/fan',user.getFanList);
+
+
 
 
     // TODO: After 로그인 인증 방법 (JWT)
