@@ -22,13 +22,13 @@ module.exports = function(app){
     app.delete('/users/:userId', user.deleteUserById);
 
     // 5. 아이디 찾기
-    app.post('/users/id', user.searchUserID);
+    app.get('/users/id', user.searchUserID); // 삭제
 
     // 6. 특정 유저 댓글 조회
     app.get('/users/:userId/comments',user.getComment);
 
     // 7. 특정 유저 플레이리스트 조회
-    app.get('/users/:userId/playlists',user.getPlaylist);
+    app.get('/users/:userId/playlists',user.getUserPlaylist);
 
     // 8. 특정 유저 좋아하는 음악 조회
     app.get('/users/:userId/likes', user.getLikeMusic);
@@ -44,6 +44,8 @@ module.exports = function(app){
 
     // 12. 특정 유저 팔로우한 가수 목록 조회
     app.get('/users/:userId/fan',user.getFanList);
+
+
 
 
 

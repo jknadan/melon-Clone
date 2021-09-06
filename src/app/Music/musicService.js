@@ -17,13 +17,12 @@ exports.updateMusicInfo = async function(musicIdx,title,lyric){
 
     const connection = await pool.getConnection(async (conn)=>conn);
 
-    const isMusic = await musicDao.selectMusicInfo(connection,musicIdx);
+    const checkMusic = await musicProvider.getMusicInfo(musicIdx);
 
-    console.log(isMusic)
-    // Validation 실패 isMusic이 [] 이라면 null이 아닌가?
-    if(isMusic == null) {
-        logger.error(`App - editMusicInfo Service error\n: ${err.message}`);
-        return response(baseResponse.DB_ERROR)
+    // console.log(checkMusic[0])
+    // [] 이라면 null이 아닌가?
+    if(checkMusic[0] === undefined) {
+        return response(baseResponse.CONTENT_RESULT_NOT_EXIST)
     }else{
         const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
         connection.release();
@@ -48,11 +47,11 @@ exports.postComment = async function(userId,albumIdx,contents){
     const postCommentResult = await musicDao.insertAlbumComment(connection,userId,albumIdx,contents);
     connection.release();
 
-    return postCommentResult;
+    return response(baseResponse.SUCCESS);
 }
 
 exports.updateComment = async function(userId,commentIdx,contents){
-    const connection = await pool.getConnection(async (conn)=>conn);
+
 
     // Validation : 유저가 작성한 댓글이 일단 Comment 테이블에 존재하는지 여부 판단
     const userComment = await musicProvider.getCommentInfo(userId,commentIdx);
@@ -61,19 +60,25 @@ exports.updateComment = async function(userId,commentIdx,contents){
         return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
     }
     else {
+        const connection = await pool.getConnection(async (conn)=>conn);
         const updateCommentResult = await musicDao.updateAlbumComment(connection, userId, commentIdx, contents);
-
         connection.release();
-        return response(baseResponse.SUCCESS,updateCommentResult);
+
+        return response(baseResponse.SUCCESS);
     }
 }
 
 exports.insertMusicPL = async function(musicIdx,playlistIdx){
 
+    //Vaildation
 
+        // 플레이리스트 중복 체크
+        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
+        console.log(isExistPlaylist[0]);
+        if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
          //음악 중복 체크
         const isExistCheck = await musicProvider.getMusicPlaylist(musicIdx,playlistIdx);
-        // console.log(isExistCheck)
+        console.log(isExistCheck)
 
         if(isExistCheck !== undefined) {
             return response(errResponse(baseResponse.MUSIC_ALREADY_EXIST))
@@ -92,7 +97,7 @@ try{
     const isExistCheck = await musicProvider.getMusicLikeList(userId,musicIdx);
     console.log(isExistCheck);
     if(isExistCheck !== undefined){
-        return response(errResponse(baseResponse.MUSIC_ALREADY_EXIST))
+        return response(errResponse(baseResponse.LIKE_ALREADY_EXIST))
     }else{
         const connection = await pool.getConnection(async (conn)=>conn);
         const addMusicLike = await musicDao.insertMusicLike(connection,userId,musicIdx);

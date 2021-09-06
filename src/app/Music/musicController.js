@@ -121,8 +121,8 @@ exports.editMusicInfo = async function(req,res){
         lyric = defaultLyric[0].lyric;
     }
 
-     await musicService.updateMusicInfo(musicIdx,title,lyric);
-    return res.send(response(baseResponse.SUCCESS));
+     const updateMusicResult = await musicService.updateMusicInfo(musicIdx,title,lyric);
+    return res.send(updateMusicResult);
 }
 /**
  * API No. 18
@@ -135,6 +135,7 @@ exports.deleteMusics = async function(req,res){
      */
 
     const musicIdx = req.params.musicIdx;
+    if(!musicIdx) return res.send(response(baseResponse.CONTENT_EMPTY));
 
     await musicService.deleteMusic(musicIdx);
     return res.send(response(baseResponse.SUCCESS));
@@ -157,12 +158,18 @@ exports.postComments = async function(req,res){
 
     //로그인 먼저
     const signInResponse = await userService.postSignIn(email,PW);
+    console.log((signInResponse))
+    // return 값 userId : (:userId)
     const userId = signInResponse.userId;
     console.log(userId)
-    // userId갖고 댓글 달기
-    const commentResult = await musicService.postComment(userId,albumIdx,contents);
+    if(!userId){
+        return res.send(baseResponse.SIGNIN_EMPTY_ACCOUNT);
+    } else{
+        // userId갖고 댓글 달기
+        const commentResult = await musicService.postComment(userId,albumIdx,contents);
 
-    return res.send(response(baseResponse.SUCCESS,commentResult));
+        return res.send(commentResult);
+    }
 
 }
 /**
@@ -181,11 +188,11 @@ exports.patchComments = async function(req,res){
     //로그인 먼저
     const signInResponse = await userService.postSignIn(email,PW);
     const userId = signInResponse.userId;
+    // console.log('이건' + userId);
 
     const commentResult = await musicService.updateComment(userId,commentIdx,contents);
 
-    return res.send(commentResult)
-    // res.send(response(baseResponse.SUCCESS,commentResult));
+    return res.send(commentResult);
 
 
 }
@@ -200,6 +207,7 @@ exports.getComments = async function(req,res){
      */
 
     const albumIdx = req.params.albumIdx;
+    if(!albumIdx) return res.send(response(baseResponse.ALBUM_ALBUMID_EMPTY));
 
     const commentList = await musicProvider.getCommentList(albumIdx);
     return res.send(response(baseResponse.SUCCESS,commentList));
@@ -211,7 +219,7 @@ exports.getComments = async function(req,res){
 /**
  * API No. 22
  * API Name : 곡 플레이리스트 추가하기 API
- * [GET] /albums/{musicIdx}/playList
+ * [GET] /albums/{musicIdx}/playlist
  */
 exports.insertPlaylists = async function(req,res){
     /**
@@ -268,5 +276,25 @@ exports.getTimeline = async function(req,res){
     const timelineResult = await musicProvider.getTimeline(musicianIdx);
 
     return res.send(response(baseResponse.SUCCESS,timelineResult));
+
+}
+
+/**
+ * API No. ??
+ * API Name : 플레이리스트 정보 조회 API
+ * [GET] /playlist/{playlistIdx}/info
+ */
+exports.getPlaylistInfo = async function(req,res){
+    /**
+     * Path Variable: playlistIdx
+     */
+
+    const playlistIdx = req.params.playlistIdx;
+    if(!playlistIdx) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
+
+    const playlistInfo = await musicProvider.getPlaylistInfo(playlistIdx);
+    console.log(playlistInfo);
+
+    return res.send(playlistInfo);
 
 }

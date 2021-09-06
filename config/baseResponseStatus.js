@@ -23,26 +23,21 @@ module.exports = {
     SIGNIN_PASSWORD_EMPTY : { "isSuccess": false, "code": 2011, "message": "비밀번호를 입력 해주세요." },
 
     USER_USERID_EMPTY : { "isSuccess": false, "code": 2012, "message": "userId를 입력해주세요." },
-    USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 2013, "message": "해당 회원이 존재하지 않습니다." },
 
-    ALBUM_ALBUMID_EMPTY : { "isSuccess": false, "code": 2112, "message": "albumId를 입력해주세요." },
-    ALBUM_ALBUMID_NOT_EXIST : { "isSuccess": false, "code": 2113, "message": "해당 앨범이 존재하지 않습니다." },
+    USER_USEREMAIL_EMPTY : { "isSuccess": false, "code": 2013, "message": "이메일을 입력해주세요." },
 
-    CONTENT_EMPTY : { "isSuccess": false, "code": 2212, "message": "내용을 입력해주세요." },
-    CONTENT_TYPE_ERROR : { "isSuccess": false, "code": 2213, "message": "올바른 내용을 입력해주세요" },
-    CONTENT_RESULT_NOT_EXIST : { "isSuccess": false, "code": 2214, "message": "결과가 존재하지 않습니다." },
+    USER_ID_NOT_MATCH : { "isSuccess": false, "code": 2014, "message": "유저 아이디 값을 확인해주세요" },
+    USER_NICKNAME_EMPTY : { "isSuccess": false, "code": 2015, "message": "변경할 닉네임 값을 입력해주세요" },
+    USER_NOT_LOGIN : { "isSuccess": false, "code": 2016, "message": "로그인해주세요." },
+    USER_STATUS_EMPTY : { "isSuccess": false, "code": 2017, "message": "회원 상태값을 입력해주세요" },
 
-    MUSIC_ALREADY_EXIST : { "isSuccess": false, "code": 2311, "message": "이미 해당 플레이리스트에 존재한 음악입니다." },
-    LIKE_ALREADY_EXIST : { "isSuccess": false, "code": 2312, "message": "이미 해당 곡에 좋아요를 누르셨습니다." },
+    ALBUM_ALBUMID_EMPTY : { "isSuccess": false, "code": 2018, "message": "albumId를 입력해주세요." },
 
+    CONTENT_EMPTY : { "isSuccess": false, "code": 2019, "message": "내용을 입력해주세요." },
+    CONTENT_TYPE_ERROR : { "isSuccess": false, "code": 2020, "message": "올바른 내용을 입력해주세요" },
 
-    USER_USEREMAIL_EMPTY : { "isSuccess": false, "code": 2014, "message": "이메일을 입력해주세요." },
-    USER_USEREMAIL_NOT_EXIST : { "isSuccess": false, "code": 2015, "message": "해당 이메일을 가진 회원이 존재하지 않습니다." },
-    USER_ID_NOT_MATCH : { "isSuccess": false, "code": 2016, "message": "유저 아이디 값을 확인해주세요" },
-    USER_NICKNAME_EMPTY : { "isSuccess": false, "code": 2017, "message": "변경할 닉네임 값을 입력해주세요" },
-    USER_NOT_LOGIN : { "isSuccess": false, "code": 2018, "message": "로그인해주세요." },
+    MUSICIAN_MUSICIANID_EMPTY : { "isSuccess": false, "code": 2021, "message": "musicianIdx를 입력해주세요." },
 
-    USER_STATUS_EMPTY : { "isSuccess": false, "code": 2018, "message": "회원 상태값을 입력해주세요" },
 
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
@@ -52,6 +47,21 @@ module.exports = {
     SIGNIN_PASSWORD_WRONG : { "isSuccess": false, "code": 3004, "message": "비밀번호가 잘못 되었습니다." },
     SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3005, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
     SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },
+    SIGNIN_EMPTY_ACCOUNT : { "isSuccess": false, "code": 3007, "message": "아이디와 비밀번호를 확인해주세요" },
+
+    MUSICIAN_MUSICIANID_NOT_EXIST : { "isSuccess": false, "code": 3008, "message": "해당 가수가 존재하지 않습니다." },
+
+    MUSIC_ALREADY_EXIST : { "isSuccess": false, "code": 3009, "message": "이미 해당 플레이리스트에 존재한 음악입니다." },
+
+    LIKE_ALREADY_EXIST : { "isSuccess": false, "code": 3010, "message": "이미 해당 곡에 좋아요를 누르셨습니다." },
+
+    CONTENT_RESULT_NOT_EXIST : { "isSuccess": false, "code": 3011, "message": "결과가 존재하지 않습니다." },
+
+    ALBUM_ALBUMID_NOT_EXIST : { "isSuccess": false, "code": 3012, "message": "해당 앨범이 존재하지 않습니다." },
+
+    USER_USEREMAIL_NOT_EXIST : { "isSuccess": false, "code": 3013, "message": "해당 이메일을 가진 회원이 존재하지 않습니다." },
+
+    USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 3014, "message": "해당 회원이 존재하지 않습니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

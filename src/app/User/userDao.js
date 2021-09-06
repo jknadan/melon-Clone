@@ -3,8 +3,14 @@ const {use} = require("express/lib/router");
 
 async function selectUser(connection) {
   const selectUserListQuery = `
-                SELECT email, name 
-                FROM User;
+                SELECT name,
+                ID,
+                age,
+                sex,
+                profileImage,
+                introduction,
+                date_format(createdAt, '%y년 %m월 %d일') as createdAt 
+                FROM User
                 `;
   const [userRows] = await connection.query(selectUserListQuery);
   return userRows;
@@ -77,11 +83,11 @@ async function selectUserAccount(connection, email) {
         SELECT status, ID, userId as id
         FROM User
         WHERE email = ?;`;
-  const selectUserAccountRow = await connection.query(
+  const [selectUserAccountRow] = await connection.query(
       selectUserAccountQuery,
       email
   );
-  return selectUserAccountRow[0];
+  return selectUserAccountRow;
 }
 
 // async function updateUserInfo(connection, ID, name) {
@@ -130,11 +136,9 @@ async function selectUserComment(connection,userId){
 
 async function selectUserPlaylist(connection,userId){
   const getPlaylistByUserIdQuery = `
-  select playListImgUrl,playListTitle,U.profileImage,U.name,M.thumbImage,M.title,S.musicianName from PlayLsit
+  select playListImgUrl,playListTitle,U.profileImage,U.name from PlayLsit
     inner join User U on PlayLsit.userId = U.userId
-    inner join Music M on PlayLsit.playListIdx = M.playListIdx
-    inner join Singer S on M.musicianIdx = S.musicianIdx
-    where PlayLsit.playListIdx = ? AND U.status = '1';
+    where PlayLsit.userId = ? AND U.status = '1';
   `;
   const [userPlaylistRows] = await connection.query(getPlaylistByUserIdQuery,userId);
   return userPlaylistRows;
@@ -150,7 +154,7 @@ async function selectUserLike(connection,userId){
 
 async function getMusicHistory(connection,userId){
   const getMusicHistory = `
-  select musicIdx,DATE_FORMAT(updatedAt, '%Y/%m/%d %T') as time from Streaming where userId = ? order by updatedAt desc;
+  select musicIdx,DATE_FORMAT(updatedAt, '%y년 %m월 %d일 %T') as time from Streaming where userId = ? order by updatedAt desc;
   `;
   const [userMusicHistoryRows] = await connection.query(getMusicHistory,userId);
   return userMusicHistoryRows;

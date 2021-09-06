@@ -65,6 +65,7 @@ exports.getUsers = async function (req, res) {
      * Query String: email
      */
     const email = req.query.email;
+    console.log(email);
 
     if (!email) {
         // 유저 전체 조회
@@ -92,7 +93,7 @@ exports.getUserById = async function (req, res) {
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const userByUserId = await userProvider.retrieveUser(userId);
-    return res.send(response(baseResponse.SUCCESS, userByUserId));
+    return res.send(userByUserId);
 };
 
 // /**
@@ -133,20 +134,23 @@ exports.deleteUserById = async function(req,res){
 
 }
 /**
- * API No. 5
+ * API No. 5 // 삭제.
  * API Name : 특정 유저 아이디찾기 API
- * [POST] /users/id
+ * [GET] /users/id
  */
+
 exports.searchUserID = async function(req,res){
     /**
-     * Body: email
+     * Query String: email
      */
 
-    const {email} = req.body; // body에서 가져오는 것은 req.body.ID 안해도 되는건가
+    const email = req.query.email;
+    console.log(email);
 
     if(!email) return res.send(errResponse(baseResponse.USER_USEREMAIL_NOT_EXIST));
 
-    const IdResponse = await userService.searchUserID(email)
+    const IdResponse = await userProvider.searchUserID(email);
+    console.log(IdResponse);
     return res.send(response(baseResponse.SUCCESS,IdResponse));
 }
 
@@ -176,7 +180,7 @@ exports.getComment = async function(req,res) {
  * API Name : 특정 유저 플레이리스트 조회 API
  * [GET] /users/{userId}/playlist
  */
-exports.getPlaylist = async function(req,res){
+exports.getUserPlaylist = async function(req,res){
     /**
      * Path Variable: userId
      */
@@ -184,7 +188,7 @@ exports.getPlaylist = async function(req,res){
 
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
-    const userPlaylistByUserId = await userProvider.getPlaylist(userId);
+    const userPlaylistByUserId = await userProvider.getUserPlaylist(userId);
     return res.send(response(baseResponse.SUCCESS,userPlaylistByUserId));
 }
 
@@ -263,6 +267,7 @@ exports.updateUserID = async function(req,res){
     const userId = req.params.userId;
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     const id = req.body.ID
+    if(!id) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
 
     const IdResponse = await userService.updateID(id,userId);
     return res.send(IdResponse);
@@ -281,9 +286,10 @@ exports.getFanList = async function(req,res){
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const fanList = await userProvider.getFanList(userId);
-    return res.send(response(baseResponse.SUCCESS,fanList));
+    return res.send(response(fanList));
 
 }
+
 
 //---------------------------------------------------------------------------------//
 

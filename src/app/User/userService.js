@@ -59,7 +59,7 @@ exports.postSignIn = async function (email, PW) {
             .createHash("sha512")
             .update(PW)
             .digest("hex");
-
+        console.log(hashedPassword);
         const selectUserPasswordParams = [selectEmail, hashedPassword];
 
         const passwordRows = await userProvider.passwordCheck(selectUserPasswordParams);
@@ -70,14 +70,13 @@ exports.postSignIn = async function (email, PW) {
 
         // 계정 상태 확인
         const userInfoRows = await userProvider.accountCheck(email);
+        console.log('이거지' + userInfoRows);
 
-        if (userInfoRows[0].status === "INACTIVE") {
-            return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
-        } else if (userInfoRows[0].status === "DELETED") {
-            return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
-        }
+        //  if (userInfoRows.status === "0") {
+        //     return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
+        // }
 
-        console.log(userInfoRows[0].id) // DB의 userId
+        console.log(userInfoRows.id) // DB의 userId
 
         //토큰 생성 Service
         // let token = await jwt.sign(
@@ -91,7 +90,7 @@ exports.postSignIn = async function (email, PW) {
         //     } // 유효 기간 365일
         // );
 
-        return {'userId': userInfoRows[0].id} // 'userId': userInfoRows[0].id, 'jwt': token
+        return {'userId': userInfoRows.id} // 'userId': userInfoRows[0].id, 'jwt': token
 
     } catch (err) {
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
@@ -123,22 +122,7 @@ exports.deleteUser = async function(userId){
     return userDeleteResult;
 }
 
-exports.searchUserID = async function (email){
-    const connection = await pool.getConnection((async (conn)=> conn));
 
-    // const userInfoRows = await userProvider.accountCheck(email);
-    //
-    // if (userInfoRows[0].status === "INACTIVE") {
-    //     return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
-    // } else if (userInfoRows[0].status === "DELETED") {
-    //     return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
-    // }
-    const userSearchIdResult = await userProvider.accountCheck(email);
-    // await userDao.searchUserID(connection,email);
-    connection.release();
-
-    return userSearchIdResult[0].id;
-}
 
 exports.updateUser = async function(name,age,userId){
     const connection = await pool.getConnection((conn)=>conn);
@@ -149,9 +133,18 @@ exports.updateUser = async function(name,age,userId){
     return updateUserResult;
 }
 exports.updateID = async function(id,userId){
-    const connection = await pool.getConnection((conn)=>conn);
-    const updateIdResult = await userDao.updateID(connection,id,userId);
-    connection.release();
 
-    return updateIdResult;
+    //Vaildation : 회원 여부 확인
+    const isExistUser = await userProvider.retrieveUser(userId);
+
+    if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+else{
+
+        const connection = await pool.getConnection((conn)=>conn);
+        const updateIdResult = await userDao.updateID(connection,id,userId);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+
+    }
 }

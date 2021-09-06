@@ -72,13 +72,16 @@ module.exports = function(app){
     app.get('/albums/:albumIdx/reply', music.getComments);
 
     // 22. 곡 플레이리스트에 추가
-    app.post('/albums/:musicIdx/playList',music.insertPlaylists);
+    app.post('/albums/:musicIdx/playlist',music.insertPlaylists);
 
     // 23. 좋아요 추가
     app.post('/albums/:musicIdx/like',music.addLike);
 
     // 24. 타임라인
     app.get('/musician/timeline',music.getTimeline);
+
+    // 25. 플레이 리스트 정보 조회
+    app.get('/playlist/:playlistIdx/info',music.getPlaylistInfo);
 
 
 };

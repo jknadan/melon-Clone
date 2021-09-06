@@ -65,7 +65,8 @@ async function searchMusicInfo(connection,keyword){
 
     const searchKeywordQuery = `
     select thumbImage,title,S.musicianName,time_format(sec_to_time(length), '%i분%s초') as length,
-    DATE_FORMAT(Music.createdAt, '%y년 %m월 %d일') as publishing 
+    DATE_FORMAT(Music.createdAt, '%y년 %m월 %d일') as publishing,
+    lyric
     from Music
     
         inner join Singer S on Music.musicianIdx = S.musicianIdx
@@ -107,7 +108,7 @@ async function insertAlbumComment(connection,userId,albumIdx,contents) {
     INSERT INTO 
     Comment(contents,userId,albumIdx) 
     VALUES (?,?,?);
-    ;`;
+    `;
 
     const insertCommentRows = await connection.query(insertCommentQuery,[contents,userId,albumIdx]);
     return insertCommentRows;
@@ -159,7 +160,7 @@ async function insertMusicPlaylist(connection,musicIdx,playlistIdx) {
     return insertMusicRows;
 }
 
-async function checkPlaylist(connection,musicIdx,playlistIdx) {
+async function checkMusicPlaylist(connection,musicIdx,playlistIdx) {
     const checkPlaylistQuery = `
     select * 
     from musicPlaylist 
@@ -171,6 +172,17 @@ async function checkPlaylist(connection,musicIdx,playlistIdx) {
     const [checkResultRows] = await connection.query(checkPlaylistQuery,[musicIdx,playlistIdx]);
     return checkResultRows[0];
 
+}
+
+async function checkPlaylist(connection,playlistIdx) {
+    const checkPlaylistQuery = `
+    select *
+    from PlayLsit 
+    where playListIdx = ?;
+    ;`;
+
+    const [checkResultRows] = await connection.query(checkPlaylistQuery,playlistIdx);
+    return checkResultRows;
 }
 
 async function checkMusicLike(connection,userId,musicIdx) {
@@ -243,6 +255,35 @@ async function getMusicianList(connection,musician) {
     return musicianRows;
 }
 
+async function getPlaylistInfo(connection,playlistIdx) {
+    const getPlaylistInfoQuery = `
+    select playListImgUrl,playListTitle,U.profileImage,U.name, count(uPL.userId) as follow from PlayLsit
+    inner join User U on PlayLsit.userId = U.userId
+    inner join userPlayList uPL on PlayLsit.playListIdx = uPL.playListIdx
+    where PlayLsit.playListIdx = ? AND PlayLsit.status = '1';
+    ;`;
+
+    const [playlistInfoRows] = await connection.query(getPlaylistInfoQuery,playlistIdx);
+    return playlistInfoRows;
+}
+async function getPlaylistMusic(connection,playlistIdx) {
+    const playlistMusicListQuery = `
+    select title,thumbImage,S.musicianName,
+       (select count(userId) as cnt from userMusicLike where musicIdx = Music.musicIdx) as "좋아요 수",
+       CASE
+           WHEN CAST(SUBSTRING(TIME_FORMAT(length, '%i:%s'), 1, 1) AS UNSIGNED) = 0
+               THEN SUBSTRING(TIME_FORMAT(length, '%i:%s'), 2)
+           ELSE TIME_FORMAT(length, '%i:%s')
+           END as playtime
+from Music
+inner join musicPlaylist mP on Music.musicIdx = mP.musicIdx
+inner join Singer S on Music.musicianIdx = S.musicianIdx
+where mP.playlistIdx = ?;
+    `;
+
+    const [playlistMusicResult] = await connection.query(playlistMusicListQuery,playlistIdx);
+    return playlistMusicResult;
+}
 module.exports = {
     selectAlbumMusic,
     selectAlbumInfo,
@@ -255,10 +296,13 @@ module.exports = {
     selectUserComment,
     selectCommentList,
     insertMusicPlaylist,
-    checkPlaylist,
+    checkMusicPlaylist,
     checkMusicLike,
     insertMusicLike,
     getTimeline,
     selectVideoInfo,
-    getMusicianList
+    getMusicianList,
+    checkPlaylist,
+    getPlaylistInfo,
+    getPlaylistMusic
 };
