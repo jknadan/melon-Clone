@@ -280,7 +280,7 @@ exports.getTimeline = async function(req,res){
 }
 
 /**
- * API No. ??
+ * API No. 25
  * API Name : 플레이리스트 정보 조회 API
  * [GET] /playlist/{playlistIdx}/info
  */
@@ -296,5 +296,23 @@ exports.getPlaylistInfo = async function(req,res){
     console.log(playlistInfo);
 
     return res.send(playlistInfo);
+
+}
+
+/**
+ * API No. 26
+ * API Name : 플레이리스트 내부 음악 재생 API
+ * [GET] /playlist/{playlistIdx}/music/{musicIdx}
+ */
+exports.playMusicInfo = async function(req,res){
+
+    const playlistIdx = req.params.playlistIdx;
+    const musicIdx = req.params.musicIdx;
+
+    if(!musicIdx) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
+
+    const musicPlayResult = await musicProvider.getPlayMusicInfo(playlistIdx,musicIdx);
+
+    return res.send(response(baseResponse.SUCCESS,musicPlayResult));
 
 }

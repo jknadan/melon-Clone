@@ -1,15 +1,16 @@
-const {logger} = require("../../../config/winston");
-const {pool} = require("../../../config/database");
-const secret_config = require("../../../config/secret");
-const musicProvider = require("./musicProvider");
-const musicDao = require("./musicDao");
-const baseResponse = require("../../../config/baseResponseStatus");
-const {response} = require("../../../config/response");
-const {errResponse} = require("../../../config/response");
+const {logger} = require("../../../config/winston"); // 디버그 중 로그 출력
+const {pool} = require("../../../config/database"); // DB연결
+const secret_config = require("../../../config/secret"); // JWT 시크릿 키
+const musicProvider = require("./musicProvider"); // Provider에서 값을 가져와야함
+const musicDao = require("./musicDao"); // MUSIC 관련 DB
+const baseResponse = require("../../../config/baseResponseStatus"); // RESPONSE
+const {response} = require("../../../config/response"); // RESPONSE
+const {errResponse} = require("../../../config/response"); // RESPONSE
 
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const {connect} = require("http2");
+const crypto = require("crypto"); //비밀번호 인코더 디코더
+const {connect} = require("http2"); //..?
+
 
 // Service: Create, Update, Delete 비즈니스 로직 처리
 

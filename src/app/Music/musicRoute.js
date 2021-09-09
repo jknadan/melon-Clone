@@ -83,6 +83,9 @@ module.exports = function(app){
     // 25. 플레이 리스트 정보 조회
     app.get('/playlist/:playlistIdx/info',music.getPlaylistInfo);
 
+    // 26. 음악 재생화면
+    app.get('/playlist/:playlistIdx/music/:musicIdx',music.playMusicInfo);
+
 
 };
 

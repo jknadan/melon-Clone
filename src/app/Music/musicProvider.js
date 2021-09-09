@@ -4,6 +4,7 @@ const { logger } = require("../../../config/winston");
 const musicDao = require("./musicDao");
 const musicProvider = require("./musicProvider");
 const {getAlbumInfo, getVideoInfo} = require("./musicProvider");
+
 const {errResponse} = require("../../../config/response");
 const {response} = require("../../../config/response");
 const baseResponse = require("../../../config/baseResponseStatus");
@@ -154,7 +155,7 @@ exports.getTimeline = async function(musicianIdx){
 
 exports.getPlaylistInfo = async function(playlistIdx){
 
-    // 플레이리스트 중복 체크
+    // 플레이리스트 존재 체크
     const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
     console.log(isExistPlaylist[0]);
     if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
@@ -168,6 +169,37 @@ exports.getPlaylistInfo = async function(playlistIdx){
     const result = Object.assign(playlistInfoResult,playlistMusicResult);
 
     return result;
+
+}
+
+exports.getPlayMusicInfo = async function(playlistIdx,musicIdx){
+
+    try{
+
+        // 플레이리스트 존재 체크
+        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
+        console.log(isExistPlaylist[0]);
+        if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
+
+        // 플레이 리스트 내부 음악 체크
+
+        const isExistCheck = await musicProvider.getMusicPlaylist(musicIdx,playlistIdx);
+        console.log(isExistCheck)
+        if(isExistCheck === undefined){
+            return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
+        } else{
+            const connection = await pool.getConnection(async (conn)=> conn);
+
+            const playMusicInfoResult = await musicDao.getPlayMusicInfo(connection,playlistIdx,musicIdx);
+            return playMusicInfoResult;
+        }
+
+
+    }catch (err) {
+        logger.error(`App - createUser Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+
 
 }
 

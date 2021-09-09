@@ -284,6 +284,29 @@ where mP.playlistIdx = ?;
     const [playlistMusicResult] = await connection.query(playlistMusicListQuery,playlistIdx);
     return playlistMusicResult;
 }
+
+async function getPlayMusicInfo(connection,playlistIdx,musicIdx) {
+    const getPlayMusicInfoQuery = `
+    select Music.title,S.musicianName,
+       albumImgUri,
+        (select count(userId)
+        from userMusicLike
+        where Music.musicIdx = userMusicLike.musicIdx)  as '좋아요 수',
+    substring(time_format(length,'%i:%s'),2) as playtime,lyric
+from Music
+
+inner join Album A on Music.albumIdx = A.albumIdx
+inner join Singer S on Music.musicianIdx = S.musicianIdx
+inner join musicPlaylist mP on Music.musicIdx = mP.musicIdx
+
+where Music.musicIdx = ? AND playlistIdx = ?;
+    ;`;
+
+    const [playMusicInfoRows] = await connection.query(getPlayMusicInfoQuery,[musicIdx,playlistIdx]);
+    return playMusicInfoRows;
+}
+
+
 module.exports = {
     selectAlbumMusic,
     selectAlbumInfo,
@@ -304,5 +327,6 @@ module.exports = {
     getMusicianList,
     checkPlaylist,
     getPlaylistInfo,
-    getPlaylistMusic
+    getPlaylistMusic,
+    getPlayMusicInfo
 };
