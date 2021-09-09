@@ -3,6 +3,7 @@ const { logger } = require("../../../config/winston");
 
 const musicDao = require("./musicDao");
 const musicProvider = require("./musicProvider");
+const musicService = require("./musicService");
 const {getAlbumInfo, getVideoInfo} = require("./musicProvider");
 
 const {errResponse} = require("../../../config/response");
@@ -172,7 +173,7 @@ exports.getPlaylistInfo = async function(playlistIdx){
 
 }
 
-exports.getPlayMusicInfo = async function(playlistIdx,musicIdx){
+exports.getPlayMusicInfo = async function(playlistIdx,musicIdx,userId){
 
     try{
 
@@ -184,13 +185,19 @@ exports.getPlayMusicInfo = async function(playlistIdx,musicIdx){
         // 플레이 리스트 내부 음악 체크
 
         const isExistCheck = await musicProvider.getMusicPlaylist(musicIdx,playlistIdx);
-        console.log(isExistCheck)
+        // console.log(isExistCheck)
         if(isExistCheck === undefined){
             return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
         } else{
             const connection = await pool.getConnection(async (conn)=> conn);
 
             const playMusicInfoResult = await musicDao.getPlayMusicInfo(connection,playlistIdx,musicIdx);
+            // console.log(playMusicInfoResult);
+            console.log("userId = " + userId);
+            const insertMusicHistory = await musicService.insertMusicHistory(userId,musicIdx);
+            console.log("기록 완료");
+
+            connection.release();
             return playMusicInfoResult;
         }
 

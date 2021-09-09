@@ -306,6 +306,15 @@ where Music.musicIdx = ? AND playlistIdx = ?;
     return playMusicInfoRows;
 }
 
+async function insertMusicHistory(connection,userId,musicIdx) {
+    const insertHistoryQuery = `
+    INSERT INTO Streaming(userId,musicIdx) values (?,?);
+    ;`;
+
+    const insertHistoryRows = await connection.query(insertHistoryQuery,[userId,musicIdx]);
+    return insertHistoryRows;
+}
+
 
 module.exports = {
     selectAlbumMusic,
@@ -328,5 +337,6 @@ module.exports = {
     checkPlaylist,
     getPlaylistInfo,
     getPlaylistMusic,
-    getPlayMusicInfo
+    getPlayMusicInfo,
+    insertMusicHistory
 };

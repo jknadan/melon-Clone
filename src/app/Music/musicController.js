@@ -306,12 +306,20 @@ exports.getPlaylistInfo = async function(req,res){
  */
 exports.playMusicInfo = async function(req,res){
 
+    /**
+     * Path Variable: playlistIdx, musicIdx
+     * QueryString: userId
+     */
+
     const playlistIdx = req.params.playlistIdx;
     const musicIdx = req.params.musicIdx;
+    const userId = req.query.userId; // 스트리밍 기록(Streaming Table에 userId MusicIdx추가)에 필요한 userId. JWT로 대체 가능한가
+
+    console.log(userId);
 
     if(!musicIdx) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
 
-    const musicPlayResult = await musicProvider.getPlayMusicInfo(playlistIdx,musicIdx);
+    const musicPlayResult = await musicProvider.getPlayMusicInfo(playlistIdx,musicIdx,userId);
 
     return res.send(response(baseResponse.SUCCESS,musicPlayResult));
 

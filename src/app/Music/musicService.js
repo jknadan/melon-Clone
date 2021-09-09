@@ -107,7 +107,24 @@ try{
     }
 }catch (err) {
     return errResponse(baseResponse.DB_ERROR);
+    }
 }
+
+exports.insertMusicHistory = async function(userId,musicIdx){
+
+    try{
+
+        const connection = await pool.getConnection(async (conn)=>conn);
+        console.log("On service, userId = " + userId);
+        const insertHistory = await musicDao.insertMusicHistory(connection,userId,musicIdx);
+
+
+        return response(baseResponse.SUCCESS);
+
+    }catch (err) {
+        logger.error(`App - createUser Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
 
 
 }
