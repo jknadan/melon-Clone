@@ -321,6 +321,6 @@ exports.playMusicInfo = async function(req,res){
 
     const musicPlayResult = await musicProvider.getPlayMusicInfo(playlistIdx,musicIdx,userId);
 
-    return res.send(response(baseResponse.SUCCESS,musicPlayResult));
+    return res.send(response(baseResponse.SUCCESS, musicPlayResult));
 
 }
