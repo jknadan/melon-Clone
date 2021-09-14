@@ -178,6 +178,7 @@ exports.getPlayMusicInfo = async function(playlistIdx,musicIdx,userId){
     try{
 
         // 플레이리스트 존재 체크
+        // 주석은 설명이 필요할 거 같은 코드에 주석을 하자. 한줄에 최대한 깔끔하고 간결.
         const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
         console.log(isExistPlaylist[0]);
         if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);

@@ -1,5 +1,5 @@
 const user = require("./userController");
-module.exports = function(app){
+    module.exports = function(app){
     const user = require('./userController');
     const jwtMiddleware = require('../../../config/jwtMiddleware');
 

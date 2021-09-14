@@ -315,6 +315,33 @@ async function insertMusicHistory(connection,userId,musicIdx) {
     return insertHistoryRows;
 }
 
+async function updateMusicRanking(connection) {
+    const updateMusicRankingQuery = `
+INSERT INTO Chart_TOP100(musicIdx, musicianIdx, ranking, StreamingCnt,difference) select * from
+(select Streaming.musicIdx as musicIdx,
+        S.musicianIdx as musicianIdx,
+        row_number() over (order by count(userId) desc) as ranking,
+        count(userId) as StreamingCnt,
+        //갱신 전 순위 - 갱신 후 순위 => -num : 순위 내려감 +num : 순위 올라감
+        cast(C.ranking as signed) - cast(row_number() over (order by count(userId) desc) as signed ) as difference 
+from Streaming
+inner join Music M on Streaming.musicIdx = M.musicIdx
+inner join Singer S on M.musicianIdx = S.musicianIdx
+left join Chart_TOP100 C on Streaming.musicIdx = C.musicIdx
+group by musicIdx) as B
+on duplicate key update Chart_TOP100.musicIdx= B.musicIdx,
+                        Chart_TOP100.musicianIdx = B.musicianIdx,
+                        Chart_TOP100.ranking = B.ranking,
+                        Chart_TOP100.StreamingCnt = B.StreamingCnt,
+                        Chart_TOP100.difference = B.difference,
+                        Chart_TOP100.updatedAt = now();
+
+    ;`;
+
+    const updateQuery = await connection.query(updateMusicRankingQuery);
+    return updateQuery;
+}
+
 
 module.exports = {
     selectAlbumMusic,
@@ -338,5 +365,6 @@ module.exports = {
     getPlaylistInfo,
     getPlaylistMusic,
     getPlayMusicInfo,
-    insertMusicHistory
+    insertMusicHistory,
+    updateMusicRanking
 };
