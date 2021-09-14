@@ -76,21 +76,20 @@ exports.postSignIn = async function (email, PW) {
         //     return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         // }
 
-        console.log(userInfoRows.id) // DB의 userId
+        console.log(userInfoRows[0].userId) // DB의 userId
 
-        //토큰 생성 Service
-        // let token = await jwt.sign(
-        //     {
-        //         userId: userInfoRows[0].id,
-        //     }, // 토큰의 내용(payload)
-        //     secret_config.jwtsecret, // 비밀키
-        //     {
-        //         expiresIn: "365d",
-        //         subject: "userInfo",
-        //     } // 유효 기간 365일
-        // );
-
-        return {'userId': userInfoRows.id} // 'userId': userInfoRows[0].id, 'jwt': token
+        // 토큰 생성 Service
+        let token = await jwt.sign(
+            {
+                userId: userInfoRows[0].userId,
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "365d",
+                subject: "userInfo",
+            } // 유효 기간 365일
+        );
+        return response(baseResponse.SUCCESS,{'userId': userInfoRows[0].userId, 'jwt': token})
 
     } catch (err) {
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
@@ -98,11 +97,11 @@ exports.postSignIn = async function (email, PW) {
     }
 };
 
-exports.editUser = async function (id, nickname) {
+exports.editUser = async function (userId, ID) {
     try {
-        console.log(id)
+        console.log(userId)
         const connection = await pool.getConnection(async (conn) => conn);
-        const editUserResult = await userDao.updateUserInfo(connection, id, nickname)
+        const editUserResult = await userDao.updateUserInfo(connection, userId, ID)
         connection.release();
 
         return response(baseResponse.SUCCESS);
