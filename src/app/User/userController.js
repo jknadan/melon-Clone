@@ -57,15 +57,21 @@ exports.postUsers = async function (req, res) {
 /**
  * API No. 2
  * API Name : 유저 조회 API (+ 이메일로 검색 조회)
- * [GET] /app/users
+ * [GET] /users
  */
 exports.getUsers = async function (req, res) {
 
     /**
      * Query String: email
      */
+
+    const userIdFromJWT = req.verifiedToken.userId
+
     const email = req.query.email;
     console.log(email);
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if (!email) {
         // 유저 전체 조회
@@ -89,6 +95,11 @@ exports.getUserById = async function (req, res) {
      * Path Variable: userId
      */
     const userId = req.params.userId;
+
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
@@ -124,10 +135,14 @@ exports.deleteUserById = async function(req,res){
     /**
      * Path Variable: userId
      */
+    const userIdFromJWT = req.verifiedToken.userId
 
     const userId = req.params.userId;
     //userId가 없으면 비어있다고 출력
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     const userByUserId = await userService.deleteUser(userId);
     return res.send(response(baseResponse.SUCCESS, userByUserId));
@@ -170,6 +185,11 @@ exports.getComment = async function(req,res) {
 
     const userId = req.params.userId;
 
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const userCommentById = await userProvider.getComment(userId);
@@ -185,6 +205,10 @@ exports.getUserPlaylist = async function(req,res){
      * Path Variable: userId
      */
     const userId = req.params.userId;
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
@@ -203,6 +227,10 @@ exports.getLikeMusic = async function(req,res){
      * Path Variable: userId
      */
     const userId = req.params.userId;
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
@@ -220,6 +248,11 @@ exports.getStreamingHistory = async function(req,res){
      * Path Variable: userId
      */
     const userId = req.params.userId;
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const userMusicHistoryByUserId = await userProvider.getMusicHistory(userId);
@@ -237,10 +270,16 @@ exports.updateUserInfo = async function(req,res){
      * Body: name ,age
      */
 
+    const userIdFromJWT = req.verifiedToken.userId;
+
     let name = req.body.name;
     let age = req.body.age;
     // body에서 값을 1개만 가져올땐 req.body.이름 -> 이렇게 명시해야함
     const userId = req.params.userId;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY));
 
@@ -255,7 +294,7 @@ exports.updateUserInfo = async function(req,res){
 
 };
 /**
- * API No. 11
+ * API No. 11 // 삭제
  * API Name : 특정 유저 ID수정 API
  * [POST] /users/{userId}/id
  */
@@ -272,6 +311,7 @@ exports.updateUserID = async function(req,res){
     const IdResponse = await userService.updateID(id,userId);
     return res.send(IdResponse);
 }
+
 /**
  * API No. 12
  * API Name : 특정 유저 팬 리스트 API
@@ -283,6 +323,11 @@ exports.getFanList = async function(req,res){
      */
 
     const userId = req.params.userId;
+    const userIdFromJWT = req.verifiedToken.userId
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const fanList = await userProvider.getFanList(userId);
@@ -299,7 +344,7 @@ exports.getFanList = async function(req,res){
  * API No. 4
  * API Name : 로그인 API
  * [POST] /app/login
- * body : email, passsword
+ * body : email, PW
  */
 exports.login = async function (req, res) {
 
@@ -309,7 +354,7 @@ exports.login = async function (req, res) {
 
     const signInResponse = await userService.postSignIn(email,PW);
 
-    return res.send(response(baseResponse.SUCCESS,signInResponse));
+    return res.send(signInResponse);
 };
 
 
@@ -318,7 +363,7 @@ exports.login = async function (req, res) {
  * API Name : 회원 정보 수정 API + JWT + Validation
  * [PATCH] /app/users/:userId
  * path variable : userId
- * body : nickname
+ * body : ID
  */
 exports.patchUsers = async function (req, res) {
 
@@ -327,14 +372,14 @@ exports.patchUsers = async function (req, res) {
     const userIdFromJWT = req.verifiedToken.userId
 
     const userId = req.params.userId;
-    const nickname = req.body.nickname;
+    const ID = req.body.ID;
 
     if (userIdFromJWT != userId) {
         res.send(errResponse(baseResponse.USER_ID_NOT_MATCH));
     } else {
-        if (!nickname) return res.send(errResponse(baseResponse.USER_NICKNAME_EMPTY));
+        if (!ID) return res.send(errResponse(baseResponse.USER_NICKNAME_EMPTY));
 
-        const editUserInfo = await userService.editUser(userId, nickname)
+        const editUserInfo = await userService.editUser(userId, ID)
         return res.send(editUserInfo);
     }
 };

@@ -86,7 +86,7 @@ exports.accountCheck = async function (email) {
   console.log(userAccountResult)
   connection.release();
 
-  return userAccountResult[0];
+  return userAccountResult;
 };
 
 exports.getComment = async function(userId){
