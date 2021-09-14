@@ -6,7 +6,7 @@ const musicDao = require("./musicDao"); // MUSIC 관련 DB
 const baseResponse = require("../../../config/baseResponseStatus"); // RESPONSE
 const {response} = require("../../../config/response"); // RESPONSE
 const {errResponse} = require("../../../config/response"); // RESPONSE
-const cron = require("node-cron");
+const cron = require('node-cron')
 
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto"); //비밀번호 인코더 디코더
@@ -16,12 +16,13 @@ const {connect} = require("http2");//..?
 // 수정 작업은 백엔드L에서 주로 이루어진다. 쿼리문은 최대한 안건드는게 규칙같은.
 // 매 시간 정각에 차트 갱신 쿼리 실행
 // config폴더에서 따로 구현. config = 설정.
-cron.schedule('00 * * * *',async function () {
+cron.schedule('34 * * * *',async function () {
 
     const connection = await pool.getConnection(async (conn)=>conn);
-    const updateMusicRanking_TOP100 = await musicDao.updateMusicRanking(connection);
-
-    return console.log('차트 갱신 실행!');
+    if(connection) console.log("connection이 살아있다")
+    const updateMusicRanking_TOP100 = musicDao.updateMusicRanking(connection);
+    if(updateMusicRanking_TOP100) console.log("asdfasdfs")
+    console.log('차트 갱신 실행!');
 
 });
 

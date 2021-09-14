@@ -314,15 +314,15 @@ async function insertMusicHistory(connection,userId,musicIdx) {
     const insertHistoryRows = await connection.query(insertHistoryQuery,[userId,musicIdx]);
     return insertHistoryRows;
 }
-
-async function updateMusicRanking(connection) {
+//갱신 전 순위 - 갱신 후 순위 => -num : 순위 내려감 +num : 순위 올라감
+function updateMusicRanking(connection) {
     const updateMusicRankingQuery = `
 INSERT INTO Chart_TOP100(musicIdx, musicianIdx, ranking, StreamingCnt,difference) select * from
 (select Streaming.musicIdx as musicIdx,
         S.musicianIdx as musicianIdx,
         row_number() over (order by count(userId) desc) as ranking,
         count(userId) as StreamingCnt,
-        //갱신 전 순위 - 갱신 후 순위 => -num : 순위 내려감 +num : 순위 올라감
+        
         cast(C.ranking as signed) - cast(row_number() over (order by count(userId) desc) as signed ) as difference 
 from Streaming
 inner join Music M on Streaming.musicIdx = M.musicIdx
@@ -338,7 +338,7 @@ on duplicate key update Chart_TOP100.musicIdx= B.musicIdx,
 
     ;`;
 
-    const updateQuery = await connection.query(updateMusicRankingQuery);
+    const updateQuery = connection.query(updateMusicRankingQuery);
     return updateQuery;
 }
 
