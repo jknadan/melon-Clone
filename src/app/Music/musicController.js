@@ -296,8 +296,9 @@ exports.getPlaylistInfo = async function(req,res){
 
     const playlistInfo = await musicProvider.getPlaylistInfo(playlistIdx);
     console.log(playlistInfo);
+    // 정상적인 출력이 아니라 내뱉는 정보 2가지 중 마지막을 출력하는건 똑같음 => 내뱉는 정보는 1개만 나오게 다시 설계해야지....
 
-    return res.send(playlistInfo);
+    return res.send(response(baseResponse.SUCCESS,playlistInfo));
 
 }
 
@@ -328,7 +329,7 @@ exports.playMusicInfo = async function(req,res){
 }
 /**
  * API No. 27
- * API Name : 플레이리스트 내부 음악 재생 API
+ * API Name : TOP100차트 목록 조회 API
  * [GET] /chart/top-100
  */
 exports.getChartInfo = async function (req,res){

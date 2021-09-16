@@ -167,9 +167,11 @@ exports.getPlaylistInfo = async function(playlistIdx){
 
     connection.release();
 // Object.assign말고 다른거 하자
-    const result = Object.assign(playlistInfoResult,playlistMusicResult);
+    playlistInfoResult[0]["list"] = playlistMusicResult;
+    // Object.assign(playlistInfoResult,playlistMusicResult);
+    // console.log(result);
 
-    return result;
+    return playlistInfoResult;
 
 }
 

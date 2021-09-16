@@ -315,7 +315,7 @@ exports.updateUserID = async function(req,res){
 /**
  * API No. 12
  * API Name : 특정 유저 팬 리스트 API
- * [POST] /users/{userId}/fan
+ * [GET] /users/{userId}/fan
  */
 exports.getFanList = async function(req,res){
     /**
@@ -331,7 +331,7 @@ exports.getFanList = async function(req,res){
     if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
 
     const fanList = await userProvider.getFanList(userId);
-    return res.send(response(fanList));
+    return res.send(response(baseResponse.SUCCESS,fanList));
 
 }
 
