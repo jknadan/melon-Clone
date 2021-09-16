@@ -211,3 +211,11 @@ exports.getPlayMusicInfo = async function(playlistIdx,musicIdx,userId){
 
 }
 
+exports.getChartInfo = async function(){
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const getChartResult = await musicDao.getChartInfo(connection);
+    return getChartResult;
+
+}
+

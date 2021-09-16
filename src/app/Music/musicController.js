@@ -4,13 +4,9 @@ const musicService = require("../../app/Music/musicService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 
-
-
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 const userService = require("../../app/User/userService");
-
-
 
 
 
@@ -329,4 +325,14 @@ exports.playMusicInfo = async function(req,res){
 
     return res.send(response(baseResponse.SUCCESS, musicPlayResult));
 
+}
+/**
+ * API No. 27
+ * API Name : 플레이리스트 내부 음악 재생 API
+ * [GET] /chart/top-100
+ */
+exports.getChartInfo = async function (req,res){
+    const chartInfo = await musicProvider.getChartInfo();
+
+    return res.send(response(baseResponse.SUCCESS,chartInfo));
 }

@@ -342,6 +342,20 @@ on duplicate key update Chart_TOP100.musicIdx= B.musicIdx,
     return updateQuery;
 }
 
+async function getChartInfo(connection) {
+    const selectChartInfoQuery = `
+    select ranking,Chart_TOP100.difference as '순위 변동',A.albumImgUri,M.title,S.musicianName from Chart_TOP100
+inner join Music M on Chart_TOP100.musicIdx = M.musicIdx
+inner join Singer S on M.musicianIdx = S.musicianIdx
+inner join Album A on M.albumIdx = A.albumIdx
+order by ranking
+limit 100;
+    `;
+
+    const [chartRows] = await connection.query(selectChartInfoQuery);
+    return chartRows;
+}
+
 
 module.exports = {
     selectAlbumMusic,
@@ -366,5 +380,6 @@ module.exports = {
     getPlaylistMusic,
     getPlayMusicInfo,
     insertMusicHistory,
-    updateMusicRanking
+    updateMusicRanking,
+    getChartInfo
 };

@@ -89,7 +89,8 @@ module.exports = function(app){
     // 26. 음악 재생화면
     app.get('/playlist/:playlistIdx/music/:musicIdx',music.playMusicInfo);
 
-    // 27.
+    // 27. 차트 화면 조회
+    app.get('/charts/top-100',music.getChartInfo);
 
 
 
