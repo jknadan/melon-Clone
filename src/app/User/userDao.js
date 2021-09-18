@@ -203,6 +203,15 @@ async function selectFanList(connection,userId) {
   return fanListRows;
 }
 
+async function getUserStatus(connection,userId){
+  const getUserStatus = `
+  select status from User where userId = ?;
+  `;
+
+  const [statusRows] = await connection.query(getUserStatus,userId);
+  return statusRows;
+}
+
 module.exports = {
   selectUser,
   selectUserEmail,
@@ -220,5 +229,6 @@ module.exports = {
   updateUserInfo,
   selecteUserAge,
   updateID,
-  selectFanList
+  selectFanList,
+  getUserStatus
 };

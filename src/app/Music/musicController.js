@@ -113,8 +113,8 @@ exports.editMusicInfo = async function(req,res){
     var {title,lyric} = req.body;
 
 
-    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
-    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+    // if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    // else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if(!title && !lyric) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
     else if(!title){

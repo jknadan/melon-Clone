@@ -31,10 +31,14 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
 
         const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
 
+        if(userStatusCheck[0].status !== 4)
+            return errResponse(baseResponse.MUSICIAN_MUSICIANID_NOT_EXIST);
+
         const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
         connection.release();
 
         return response(baseResponse.SUCCESS);
+
     }
 
 }

@@ -171,3 +171,13 @@ exports.getFanList = async function(userId){
 
   return fanListResult;
 }
+
+exports.getUserInfo = async function(userIdFromJWT){
+
+  const connection = await pool.getConnection(async (conn) => conn);
+
+  const checkStatus = await userDao.getUserStatus(connection,userIdFromJWT);
+  connection.release();
+
+  return checkStatus;
+}

@@ -1,1 +1,4 @@
 * 09월16일 : config폴더로 scheduler.js파일 독립. 매 시각 00분에 차트 갱신 후 랭킹 업데이트하는 쿼리 실행.
+
+* 09월18일 : jwt에서 userId를 받아와서 status확인 후 4(musician등급)이 아닌지 확인하고 musician이 아니면 수정을 못하도록 수정.
+-> 추후 musician이 자기 노래만 수정 할 수 있도록 수정해야함. 현재까지는 그냥 musician등급이면 아무나 가능.
