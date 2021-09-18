@@ -21,14 +21,14 @@ exports.getTest = async function (req, res) {
 /**
  * API No. 1
  * API Name : 유저 생성 (회원가입) API
- * [POST] /app/users
+ * [POST] /users
  */
 exports.postUsers = async function (req, res) {
 
     /**
      * Body: email, PW, name
      */
-    const {email, PW, name} = req.body;
+    const {name,email,ID,PW,age,sex} = req.body;
 
     // 빈 값 체크
     if (!email)
@@ -48,7 +48,10 @@ exports.postUsers = async function (req, res) {
     const signUpResponse = await userService.createUser(
         email,
         PW,
-        name
+        name,
+        ID,
+        age,
+        sex
     );
 
     return res.send(signUpResponse);
@@ -343,7 +346,7 @@ exports.getFanList = async function(req,res){
 /**
  * API No. 4
  * API Name : 로그인 API
- * [POST] /app/login
+ * [POST] /login
  * body : email, PW
  */
 exports.login = async function (req, res) {

@@ -1,7 +1,8 @@
 const {logger} = require("../../../config/winston"); // 디버그 중 로그 출력
 const {pool} = require("../../../config/database"); // DB연결
 const secret_config = require("../../../config/secret"); // JWT 시크릿 키
-const musicProvider = require("./musicProvider"); // Provider에서 값을 가져와야함
+const musicProvider = require("./musicProvider"); // Provider에서 값을 가져와야함'
+const userProvider = require("../User/userProvider");
 const musicDao = require("./musicDao"); // MUSIC 관련 DB
 const baseResponse = require("../../../config/baseResponseStatus"); // RESPONSE
 const {response} = require("../../../config/response"); // RESPONSE
@@ -16,7 +17,7 @@ const {connect} = require("http2");//..?
 
 // Service: Create, Update, Delete 비즈니스 로직 처리
 
-exports.updateMusicInfo = async function(musicIdx,title,lyric){
+exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
 
     const connection = await pool.getConnection(async (conn)=>conn);
 
@@ -27,6 +28,9 @@ exports.updateMusicInfo = async function(musicIdx,title,lyric){
     if(checkMusic[0] === undefined) {
         return response(baseResponse.CONTENT_RESULT_NOT_EXIST)
     }else{
+
+        const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
+
         const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
         connection.release();
 

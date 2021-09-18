@@ -107,12 +107,14 @@ exports.editMusicInfo = async function(req,res){
      * Body: title,lyric
      */
 
+    const userIdFromJWT = req.verifiedToken.userId;
     const musicIdx = req.params.musicIdx;
 
     var {title,lyric} = req.body;
 
-    // var title = req.body.title;
-    // var lyric = req.body.lyric;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if(!title && !lyric) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
     else if(!title){
@@ -123,7 +125,7 @@ exports.editMusicInfo = async function(req,res){
         lyric = defaultLyric[0].lyric;
     }
 
-     const updateMusicResult = await musicService.updateMusicInfo(musicIdx,title,lyric);
+     const updateMusicResult = await musicService.updateMusicInfo(userIdFromJWT,musicIdx,title,lyric);
     return res.send(updateMusicResult);
 }
 /**
