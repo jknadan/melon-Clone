@@ -221,3 +221,10 @@ exports.getChartInfo = async function(){
 
 }
 
+exports.getMusicianCheck = async function(userIdFromJWT){
+    const connection = await pool.getConnection(async (conn)=> conn);
+
+    const getMusicianResult = await musicDao.getMusicianCheck(connection,userId);
+    return getMusicianResult;
+}
+

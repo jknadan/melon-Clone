@@ -212,6 +212,17 @@ async function getUserStatus(connection,userId){
   return statusRows;
 }
 
+async function getMusicianCheck(connection,userId) {
+  const selectMusicianStatus = `
+    select musicIdx,title from Music
+    inner join Singer S on Music.musicianIdx = S.musicianIdx
+    where S.userId = ?;
+    ;`;
+
+  const [musicianCheckRows] = await connection.query(selectMusicianStatus,userId);
+  return musicianCheckRows;
+}
+
 module.exports = {
   selectUser,
   selectUserEmail,
@@ -230,5 +241,6 @@ module.exports = {
   selecteUserAge,
   updateID,
   selectFanList,
-  getUserStatus
+  getUserStatus,
+  getMusicianCheck
 };

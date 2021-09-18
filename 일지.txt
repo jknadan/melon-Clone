@@ -2,3 +2,5 @@
 
 * 09월18일 : jwt에서 userId를 받아와서 status확인 후 4(musician등급)이 아닌지 확인하고 musician이 아니면 수정을 못하도록 수정.
 -> 추후 musician이 자기 노래만 수정 할 수 있도록 수정해야함. 현재까지는 그냥 musician등급이면 아무나 가능.
+-> 19일 02시54분 : musicService에서 userMusicianCheck의 객체 안의 musicIdx을 검색하고 싶다. controller에서 받은 musicIdx가
+userMusicianCheck에 있는지 확인하기 위해선 뭐가 있을까

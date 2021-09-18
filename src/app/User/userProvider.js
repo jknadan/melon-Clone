@@ -181,3 +181,12 @@ exports.getUserInfo = async function(userIdFromJWT){
 
   return checkStatus;
 }
+
+exports.getMusicianCheck = async function(userIdFromJWT) {
+  const connection = await pool.getConnection(async (conn)=>conn);
+
+  const musicianCheck = await userDao.getMusicianCheck(connection,userIdFromJWT);
+  connection.release();
+
+  return musicianCheck;
+}

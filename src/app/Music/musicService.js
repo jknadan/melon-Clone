@@ -30,10 +30,17 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
     }else{
 
         const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
+        const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
+
 
         if(userStatusCheck[0].status !== 4)
             return errResponse(baseResponse.MUSICIAN_MUSICIANID_NOT_EXIST);
 
+
+
+        // if(!(userMusicianCheck.includes(musicIdx))){
+        //     console.log("해당 음원은 뮤지션의 발매곡들 중 하나임")
+        // }
         const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
         connection.release();
 

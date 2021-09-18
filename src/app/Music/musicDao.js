@@ -357,6 +357,8 @@ limit 100;
 }
 
 
+
+
 module.exports = {
     selectAlbumMusic,
     selectAlbumInfo,
@@ -382,4 +384,5 @@ module.exports = {
     insertMusicHistory,
     updateMusicRanking,
     getChartInfo
+
 };
