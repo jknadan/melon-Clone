@@ -98,16 +98,24 @@ exports.postSignIn = async function (email, PW) {
 };
 
 exports.editUser = async function (userId, ID) {
+
+    const connection = await pool.getConnection(async (conn) => conn);
+
     try {
+        await connection.beginTransaction();
         console.log(userId)
-        const connection = await pool.getConnection(async (conn) => conn);
-        const editUserResult = await userDao.updateUserInfo(connection, userId, ID)
+        const editUserResult = await userDao.updateID(connection, userId, ID)
+        await connection.commit();
+        if(connection.commit()) console.log("쿼리 commit함");
+        console.log(editUserResult);
         connection.release();
 
-        return response(baseResponse.SUCCESS);
-
+        // return response(baseResponse.SUCCESS);
+        return err;
     } catch (err) {
         logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
         return errResponse(baseResponse.DB_ERROR);
     }
 }

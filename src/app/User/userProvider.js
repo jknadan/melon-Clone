@@ -91,44 +91,94 @@ exports.accountCheck = async function (email) {
 
 exports.getComment = async function(userId){
 
-  //Vaildation : 회원 존재 확인
-  const isExistUser = await exports.retrieveUser(userId);
-  if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
-
-
   const connection = await pool.getConnection(async (conn)=>conn);
-  const userCommentResult = await userDao.selectUserComment(connection,userId);
-  connection.release();
 
-  return userCommentResult;
+  try{
+
+    await connection.beginTransaction();
+
+    //Vaildation : 회원 존재 확인
+    const isExistUser = await exports.retrieveUser(userId);
+    if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+
+    const userCommentResult = await userDao.selectUserComment(connection,userId);
+
+    await connection.commit();
+
+    connection.release();
+
+    return userCommentResult;
+
+  }catch (err) {
+    logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+    await connection.rollback();
+    return errResponse(baseResponse.DB_ERROR);
+  }
+
+
+
 }
 
 exports.getUserPlaylist = async function(userId){
 
-  //Vaildation : 회원 존재 확인
-  const isExistUser = await exports.retrieveUser(userId);
-  if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
-
-
   const connection = await pool.getConnection(async (conn)=>conn);
-  const userPlaylistResult = await userDao.selectUserPlaylist(connection,userId);
-  connection.release();
+  try{
 
-  return userPlaylistResult;
+    await connection.beginTransaction();
+
+    //Vaildation : 회원 존재 확인
+    const isExistUser = await exports.retrieveUser(userId);
+    if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+
+
+    const userPlaylistResult = await userDao.selectUserPlaylist(connection,userId);
+    await connection.commit();
+    connection.release();
+
+    return userPlaylistResult;
+  }catch (err) {
+    logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+    await connection.rollback();
+    return errResponse(baseResponse.DB_ERROR);
+  }
+
 }
 
 exports.getLikeMusic = async function(userId){
 
-  //Vaildation : 회원 존재 확인
-  const isExistUser = await exports.retrieveUser(userId);
-  if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
-
-
   const connection = await pool.getConnection(async (conn)=>conn);
-  const userLikeMusicResult = await userDao.selectUserLike(connection,userId);
-  connection.release();
+  // console.log(connection);
+  try{
 
-  return userLikeMusicResult;
+    await connection.beginTransaction();
+    //Vaildation : 회원 존재 확인
+    const isExistUser = await exports.retrieveUser(userId);
+    if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+
+
+
+    const userLikeMusicResult = await userDao.selectUserLike(connection,userId);
+    await connection.commit();
+    if(connection.commit()) {
+
+      console.log("쿼리 commit 됨.");
+      console.log(connection.commit());
+
+    }
+    connection.release();
+    if(connection.release()) console.log("connection.release 됨")
+    // console.log(connection);
+
+    return userLikeMusicResult;
+  }catch (err) {
+    logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+    await connection.rollback();
+    if(connection.rollback) {
+      console.log("쿼리 롤백 됨.");
+      console.log(connection.rollback());
+    }
+    return errResponse(baseResponse.DB_ERROR);
+  }
 }
 
 exports.getMusicHistory = async function(userId){

@@ -146,7 +146,11 @@ async function selectUserPlaylist(connection,userId){
 
 async function selectUserLike(connection,userId){
   const getLikeByUserIdQuery = `
-  select musicIdx from userMusicLike where userId = ?;
+  select albumImgUri,M.title,S.musicianName from userMusicLike
+inner join Music M on userMusicLike.musicIdx = M.musicIdx
+inner join Album A on M.albumIdx = A.albumIdx
+inner join Singer S on M.musicianIdx = S.musicianIdx
+where userMusicLike.userId = ?;
   `;
   const [userLikeRows] = await connection.query(getLikeByUserIdQuery,userId);
   return userLikeRows;
@@ -181,7 +185,7 @@ async function selecteUserAge(connection,userId){
   return UserAgeRows;
 }
 
-async function updateID(connection,id,userId){
+async function updateID(connection,userId,id){
   const updateIdQuery = `
   UPDATE User
   SET ID = ?
