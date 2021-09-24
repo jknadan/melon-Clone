@@ -1,0 +1,13 @@
+{"web":
+  {
+    "client_id":"116458880126-80o82hgtui057190cod3mvu5514u4ef4.apps.googleusercontent.com",
+    "project_id":"nodejs-oauth-sample",
+    "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+    "token_uri":"https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret":"ioDlpPliZTP_xAeH8zShdXei",
+    "redirect_uris": [
+      "http://localhost:3000/auth/google/callback"
+    ]
+  }
+}

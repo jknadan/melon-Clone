@@ -10,12 +10,7 @@ const musicDao = require("../src/app/Music/musicDao");
 
 function chartScheduler() {
 
-    // schedule.schedule('28 * * * *',function () {
-    //
-    //     console.log("cron실행");
-    //
-    // });
-    // 매 시간 정각에 차트 업데이트
+
     cron.schedule('00 * * * *',async function () {
 
         const connection = await pool.getConnection(async (conn)=>conn);
@@ -29,11 +24,6 @@ function chartScheduler() {
 
 }
 
-// 얘도 실행은 됌. 근데 주석 처리해도 왜 되냐ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-
-// setInterval(function () {
-//     console.log('ㅋㅋㅋㅋㅋㅋ')
-// },1000)
 
 module.exports = {
     schedule : chartScheduler

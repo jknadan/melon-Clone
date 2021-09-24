@@ -1,7 +1,9 @@
 const user = require("./userController");
+
     module.exports = function(app){
     const user = require('./userController');
     const jwtMiddleware = require('../../../config/jwtMiddleware');
+
 
     // 💥 원래 route에는 /{앱이름(ex:melon)}/users ... 이렇게 지어줘야함.
 
@@ -57,7 +59,8 @@ const user = require("./userController");
     app.post('/login', user.login);
 
     // 회원 정보 수정 API (JWT 검증 및 Validation - 메소드 체이닝 방식으로 jwtMiddleware 사용)
-    app.patch('/app/users/:userId', jwtMiddleware, user.patchUsers)
+    app.patch('/app/users/:userId', jwtMiddleware, user.patchUsers);
+
 
 
 

@@ -4,9 +4,11 @@ const userService = require("../../app/User/userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 
+
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 const {deleteUserById} = require("./userController");
+
 
 /**
  * API No. 0
@@ -386,6 +388,8 @@ exports.patchUsers = async function (req, res) {
         return res.send(editUserInfo);
     }
 };
+
+
 
 
 
