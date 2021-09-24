@@ -123,35 +123,70 @@ exports.editUser = async function (userId, ID) {
 // 유저 삭제
 exports.deleteUser = async function(userId){
     const connection = await pool.getConnection((async (conn)=> conn));
-    const userDeleteResult = await userDao.deleteUserAccount(connection,userId);
-    connection.release();
+    try{
+        await connection.beginTransaction();
 
-    return userDeleteResult;
+        const userDeleteResult = await userDao.deleteUserAccount(connection,userId);
+        await connection.commit();
+        connection.release();
+
+        return userDeleteResult;
+    }catch (err){
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
 }
 
 
 
 exports.updateUser = async function(name,age,userId){
     const connection = await pool.getConnection((conn)=>conn);
-    const updateUserResult = await userDao.updateUserInfo(connection,name,age,userId);
-    console.log(age);
-    connection.release();
 
-    return updateUserResult;
+    try{
+        await connection.beginTransaction();
+        const updateUserResult = await userDao.updateUserInfo(connection,name,age,userId);
+        console.log(age);
+        await connection.commit();
+        connection.release();
+
+        return updateUserResult;
+    }catch (err) {
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
 }
 exports.updateID = async function(id,userId){
 
-    //Vaildation : 회원 여부 확인
-    const isExistUser = await userProvider.retrieveUser(userId);
+    const connection = await pool.getConnection((conn)=>conn);
 
-    if(isExistUser === undefined) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
-else{
+    try{
 
-        const connection = await pool.getConnection((conn)=>conn);
-        const updateIdResult = await userDao.updateID(connection,id,userId);
-        connection.release();
+        await connection.beginTransaction();
 
-        return response(baseResponse.SUCCESS);
+        //Vaildation : 회원 여부 확인
+        const isExistUser = await userProvider.retrieveUser(userId);
 
+        if(isExistUser === undefined)
+            return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+        else{
+
+            const updateIdResult = await userDao.updateID(connection,id,userId);
+            await connection.commit();
+            connection.release();
+
+            return response(baseResponse.SUCCESS);
+
+        }
+    }catch (err) {
+
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
     }
+
 }

@@ -21,31 +21,44 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
 
     const connection = await pool.getConnection(async (conn)=>conn);
 
-    const checkMusic = await musicProvider.getMusicInfo(musicIdx);
+    try{
 
-    // console.log(checkMusic[0])
-    // [] 이라면 null이 아닌가?
-    if(checkMusic[0] === undefined) {
-        return response(baseResponse.CONTENT_RESULT_NOT_EXIST)
-    }else{
+        await connection.beginTransaction();
 
-        const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
-        const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
+        const checkMusic = await musicProvider.getMusicInfo(musicIdx);
+
+        // console.log(checkMusic[0])
+        // [] 이라면 null이 아닌가?
+        if(checkMusic[0] === undefined) {
+            return response(baseResponse.CONTENT_RESULT_NOT_EXIST)
+        }else{
+
+            const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
+            const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
 
 
-        if(userStatusCheck[0].status !== 4)
-            return errResponse(baseResponse.MUSICIAN_MUSICIANID_NOT_EXIST);
+            if(userStatusCheck[0].status !== 4)
+                return errResponse(baseResponse.MUSICIAN_MUSICIANID_NOT_EXIST);
 
 
 
-        // if(!(userMusicianCheck.includes(musicIdx))){
-        //     console.log("해당 음원은 뮤지션의 발매곡들 중 하나임")
-        // }
-        const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
-        connection.release();
+            // if(!(userMusicianCheck.includes(musicIdx))){
+            //     console.log("해당 음원은 뮤지션의 발매곡들 중 하나임")
+            // }
+            const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
+            await connection.commit();
+            connection.release();
 
-        return response(baseResponse.SUCCESS);
+            return response(baseResponse.SUCCESS);
 
+        }
+
+    }catch (err) {
+
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
     }
 
 }
@@ -53,93 +66,153 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
 exports.deleteMusic= async function(musicIdx){
 
     const connection = await pool.getConnection(async (conn)=>conn);
-    const deleteMusicResult = await musicDao.deleteMusic(connection,musicIdx);
-    connection.release();
 
-    return deleteMusicResult;
+    try{
+        await connection.beginTransaction();
+        const deleteMusicResult = await musicDao.deleteMusic(connection,musicIdx);
+        await connection.commit();
+        connection.release();
+
+        return deleteMusicResult;
+
+    }catch (err){
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
 }
 
 exports.postComment = async function(userId,albumIdx,contents){
 
     const connection = await pool.getConnection(async (conn)=>conn);
-    const postCommentResult = await musicDao.insertAlbumComment(connection,userId,albumIdx,contents);
-    connection.release();
+    try{
+        await connection.beginTransaction();
 
-    return response(baseResponse.SUCCESS);
+        const postCommentResult = await musicDao.insertAlbumComment(connection,userId,albumIdx,contents);
+        await connection.commit();
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+
+    }catch (err) {
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
 }
 
 exports.updateComment = async function(userId,commentIdx,contents){
 
 
-    // Validation : 유저가 작성한 댓글이 일단 Comment 테이블에 존재하는지 여부 판단
-    const userComment = await musicProvider.getCommentInfo(userId,commentIdx);
-    console.log(userComment[0]);
-    if(userComment[0] === undefined){
-        return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
-    }
-    else {
-        const connection = await pool.getConnection(async (conn)=>conn);
-        const updateCommentResult = await musicDao.updateAlbumComment(connection, userId, commentIdx, contents);
-        connection.release();
+    const connection = await pool.getConnection(async (conn)=>conn);
+    try{
+        await connection.beginTransaction();
 
-        return response(baseResponse.SUCCESS);
+        // Validation : 유저가 작성한 댓글이 일단 Comment 테이블에 존재하는지 여부 판단
+        const userComment = await musicProvider.getCommentInfo(userId,commentIdx);
+        console.log(userComment[0]);
+        if(userComment[0] === undefined){
+            return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
+        }
+        else {
+            const updateCommentResult = await musicDao.updateAlbumComment(connection, userId, commentIdx, contents);
+            await connection.commit();
+            connection.release();
+
+            return response(baseResponse.SUCCESS);
+        }
+    }catch (err){
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
     }
+
 }
 
 exports.insertMusicPL = async function(musicIdx,playlistIdx){
 
-    //Vaildation
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    try{
+        await connection.beginTransaction();
+
+        //Vaildation
 
         // 플레이리스트 중복 체크
         const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
         console.log(isExistPlaylist[0]);
+
         if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
-         //음악 중복 체크
+
+        //음악 중복 체크
         const isExistCheck = await musicProvider.getMusicPlaylist(musicIdx,playlistIdx);
         console.log(isExistCheck)
 
         if(isExistCheck !== undefined) {
             return response(errResponse(baseResponse.MUSIC_ALREADY_EXIST))
         }else{
-            const connection = await pool.getConnection(async (conn)=>conn);
-
             const insertMusicResult = await musicDao.insertMusicPlaylist(connection,musicIdx,playlistIdx);
+            await connection.commit();
+            connection.release();
             return response(baseResponse.SUCCESS);
         }
+
+    }catch (err){
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
+
 
 }
 
 exports.addMusicLike = async function(userId,musicIdx){
 
+    const connection = await pool.getConnection(async (conn)=>conn);
+
 try{
+    await connection.beginTransaction();
     const isExistCheck = await musicProvider.getMusicLikeList(userId,musicIdx);
     console.log(isExistCheck);
     if(isExistCheck !== undefined){
         return response(errResponse(baseResponse.LIKE_ALREADY_EXIST))
     }else{
-        const connection = await pool.getConnection(async (conn)=>conn);
+
         const addMusicLike = await musicDao.insertMusicLike(connection,userId,musicIdx);
+        await connection.commit();
+        connection.release();
 
         return response(baseResponse.SUCCESS);
     }
 }catch (err) {
+    logger.error(`App - editUser Service error\n: ${err.message}`);
+    connection.rollback();
+    if(connection.rollback()) console.log("쿼리 rollback함");
     return errResponse(baseResponse.DB_ERROR);
     }
 }
 
 exports.insertMusicHistory = async function(userId,musicIdx){
 
+    const connection = await pool.getConnection(async (conn)=>conn);
     try{
+        await connection.beginTransaction();
 
-        const connection = await pool.getConnection(async (conn)=>conn);
         console.log("On service, userId = " + userId);
         const insertHistory = await musicDao.insertMusicHistory(connection,userId,musicIdx);
-
+        await connection.commit();
+        connection.release();
 
         return response(baseResponse.SUCCESS);
 
     }catch (err) {
-        logger.error(`App - createUser Service error\n: ${err.message}`);
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        connection.rollback();
+        if(connection.rollback()) console.log("쿼리 rollback함");
         return errResponse(baseResponse.DB_ERROR);
     }
 
