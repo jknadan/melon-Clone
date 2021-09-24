@@ -321,9 +321,9 @@ INSERT INTO Chart_TOP100(musicIdx, musicianIdx, ranking, StreamingCnt,difference
 (select Streaming.musicIdx as musicIdx,
         S.musicianIdx as musicianIdx,
         row_number() over (order by count(userId) desc) as ranking,
-        count(userId) as StreamingCnt,
+        count(Streaming.userId) as StreamingCnt,
         
-        cast(C.ranking as signed) - cast(row_number() over (order by count(userId) desc) as signed ) as difference 
+        cast(C.ranking as signed) - cast(row_number() over (order by count(Streaming.userId) desc) as signed ) as difference 
 from Streaming
 inner join Music M on Streaming.musicIdx = M.musicIdx
 inner join Singer S on M.musicianIdx = S.musicianIdx
