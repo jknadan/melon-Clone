@@ -36,6 +36,8 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
             const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
             const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
 
+            console.log(userMusicianCheck);
+
 
             if(userStatusCheck[0].status !== 4)
                 return errResponse(baseResponse.MUSICIAN_MUSICIANID_NOT_EXIST);

@@ -158,7 +158,7 @@ exports.getPlaylistInfo = async function(playlistIdx){
 
     // 플레이리스트 존재 체크
     const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
-    console.log(isExistPlaylist[0]);
+    // console.log(isExistPlaylist[0]);
     if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
 
     const connection = await pool.getConnection(async (conn)=>conn);
@@ -168,6 +168,7 @@ exports.getPlaylistInfo = async function(playlistIdx){
     connection.release();
 // Object.assign말고 다른거 하자
     playlistInfoResult[0]["list"] = playlistMusicResult;
+    console.log(playlistInfoResult[0].list[0].title)
     // Object.assign(playlistInfoResult,playlistMusicResult);
     // console.log(result);
 

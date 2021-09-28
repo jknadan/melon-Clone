@@ -297,8 +297,7 @@ exports.getPlaylistInfo = async function(req,res){
     if(!playlistIdx) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
 
     const playlistInfo = await musicProvider.getPlaylistInfo(playlistIdx);
-    console.log(playlistInfo);
-    // 정상적인 출력이 아니라 내뱉는 정보 2가지 중 마지막을 출력하는건 똑같음 => 내뱉는 정보는 1개만 나오게 다시 설계해야지....
+    // console.log(playlistInfo);
 
     return res.send(response(baseResponse.SUCCESS,playlistInfo));
 

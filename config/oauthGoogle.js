@@ -47,4 +47,11 @@ async function googleLogin(code) {
     return res.data.displayName;
 }
 
-
+module.exports = {
+    googleConfig,
+    scopes,
+    oauth2Client,
+    url,
+    getGooglePlusApi,
+    googleLogin,
+}

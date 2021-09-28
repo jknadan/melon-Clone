@@ -218,9 +218,10 @@ async function getUserStatus(connection,userId){
 
 async function getMusicianCheck(connection,userId) {
   const selectMusicianStatus = `
-    select musicIdx,title from Music
-    inner join Singer S on Music.musicianIdx = S.musicianIdx
-    where S.userId = ?;
+    select Singer.musicianIdx,A.title as albumTitle,A.albumIdx,musicIdx,M.title as musicTitle from Singer
+inner join Album A on Singer.musicianIdx = A.musicianIdx
+inner join Music M on A.albumIdx = M.albumIdx
+where userId = ?
     ;`;
 
   const [musicianCheckRows] = await connection.query(selectMusicianStatus,userId);
