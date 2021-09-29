@@ -65,6 +65,13 @@ module.exports = {
 
     MUSIC_MUSICID_NOT_EXIST : { "isSuccess": false, "code": 3015, "message": "해당 음악이 존재하지 않습니다." },
 
+    MUSIC_MUSICID_NOT_ALLOWED : { "isSuccess": false, "code": 3016, "message": "해당 음악에 대한 권한이 없습니다." },
+
+    USERID_MUSICIANID_NOT_MATCH : { "isSuccess": false, "code": 3017, "message": "해당 유저는 아티스트가 아닙니다." },
+
+
+
+
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},

@@ -139,9 +139,14 @@ exports.deleteMusics = async function(req,res){
      */
 
     const musicIdx = req.params.musicIdx;
+    const userIdFromJWT = req.verifiedToken.userId
+
+    // if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if(!musicIdx) return res.send(response(baseResponse.CONTENT_EMPTY));
 
-    await musicService.deleteMusic(musicIdx);
+    await musicService.deleteMusic(musicIdx,userIdFromJWT);
     return res.send(response(baseResponse.SUCCESS));
 
 }
