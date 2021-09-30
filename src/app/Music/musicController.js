@@ -138,66 +138,69 @@ exports.deleteMusics = async function(req,res){
      * Path Variable(타겟이 있는경우): musicIdx
      */
 
+    const userIdFromJWT = req.verifiedToken.userId;
     const musicIdx = req.params.musicIdx;
-    const userIdFromJWT = req.verifiedToken.userId
+
 
     // if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
     if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if(!musicIdx) return res.send(response(baseResponse.CONTENT_EMPTY));
 
-    await musicService.deleteMusic(musicIdx,userIdFromJWT);
-    return res.send(response(baseResponse.SUCCESS));
+    const deleteMusic = await musicService.deleteMusic(musicIdx,userIdFromJWT);
+    return res.send(deleteMusic);
 
 }
 
 /**
  * API No. 19
  * API Name : 앨범에 댓글 달기 API
- * [POST] /albums/{albumIdx}/reply
+ * [POST] /albums/{albumIdx}/reply/{userId}
  */
 exports.postComments = async function(req,res){
     /**
      * Path Variable(타겟이 있는경우): commentIdx
-     * Body : contents,email,PW
+     * Body : contents
      */
 
     const albumIdx = req.params.albumIdx;
-    const {contents,email,PW} = req.body;
+    const userId = req.params.userId;
+    const {contents} = req.body;
+    const userIdFromJWT = req.verifiedToken.userId;
 
-    //로그인 먼저
-    const signInResponse = await userService.postSignIn(email,PW);
-    console.log((signInResponse))
-    // return 값 userId : (:userId)
-    const userId = signInResponse.userId;
-    console.log(userId)
-    if(!userId){
-        return res.send(baseResponse.SIGNIN_EMPTY_ACCOUNT);
-    } else{
-        // userId갖고 댓글 달기
-        const commentResult = await musicService.postComment(userId,albumIdx,contents);
+    console.log("userId:"+ typeof userId + "//" + "jwtUserId :" + typeof userIdFromJWT);
 
-        return res.send(commentResult);
-    }
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
+    // userId갖고 댓글 달기
+    const commentResult = await musicService.postComment(userIdFromJWT,albumIdx,contents);
+
+    return res.send(commentResult);
 }
 /**
  * API No. 20
  * API Name : 앨범에 댓글 수정 API
- * [PATCH] /albums/{albumIdx}/reply/{commentIdx}
+ * [PATCH] /albums/{albumIdx}/reply/{userId}
  */
 exports.patchComments = async function(req,res){
     /**
-     * Path Variable(타겟이 있는경우): albumIdx ,commentIdx
+     * Path Variable(타겟이 있는경우): albumIdx
+     * Query String : commentIdx
      * Body : contents,email,PW
      */
 
-    const {contents,email,PW} = req.body;
-    const commentIdx = req.params.commentIdx;
-    //로그인 먼저
-    const signInResponse = await userService.postSignIn(email,PW);
-    const userId = signInResponse.userId;
-    // console.log('이건' + userId);
+    const {contents} = req.body;
+    const commentIdx = req.query.commentIdx;
+    const userIdFromJWT = req.verifiedToken.userId;
+    const userId = req.params.userId;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+    // //로그인 먼저
+    // const signInResponse = await userService.postSignIn(email,PW);
+    // const userId = signInResponse.userId;
+    // // console.log('이건' + userId);
 
     const commentResult = await musicService.updateComment(userId,commentIdx,contents);
 
@@ -228,18 +231,25 @@ exports.getComments = async function(req,res){
 /**
  * API No. 22
  * API Name : 곡 플레이리스트 추가하기 API
- * [GET] /albums/{musicIdx}/playlist
+ * [POST] /albums/{musicIdx}/playlist
  */
 exports.insertPlaylists = async function(req,res){
     /**
      * Path Variable(타겟이 있는경우): musicIdx
+     * Query String : userId
      * Body : playlistIdx
      */
 
     const musicIdx = req.params.musicIdx;
     const playlistIdx = req.body.playlistIdx;
+    const userIdFromJWT = req.verifiedToken.userId;
+    const userId = req.query.userId;
 
-    const insertMusic = await musicService.insertMusicPL(musicIdx,playlistIdx);
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
+    const insertMusic = await musicService.insertMusicPL(musicIdx,playlistIdx,userIdFromJWT);
     return res.send(insertMusic);
 
 }
@@ -257,6 +267,10 @@ exports.addLike = async function(req,res){
 
     const musicIdx = req.params.musicIdx;
     const userId = req.query.userId;
+    const userIdFromJWT = req.verifiedToken.userId;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     if(!userId) {
         return res.send(errResponse(baseResponse.USER_NOT_LOGIN));
@@ -296,12 +310,19 @@ exports.getTimeline = async function(req,res){
 exports.getPlaylistInfo = async function(req,res){
     /**
      * Path Variable: playlistIdx
+     * Query String: userId
      */
 
     const playlistIdx = req.params.playlistIdx;
+    const userIdFromJWT = req.verifiedToken.userId;
+    const userId = req.query.userId;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
+
     if(!playlistIdx) return res.send(errResponse(baseResponse.CONTENT_EMPTY));
 
-    const playlistInfo = await musicProvider.getPlaylistInfo(playlistIdx);
+    const playlistInfo = await musicProvider.getPlaylistInfo(playlistIdx,userId);
     // console.log(playlistInfo);
 
     return res.send(response(baseResponse.SUCCESS,playlistInfo));
@@ -323,6 +344,10 @@ exports.playMusicInfo = async function(req,res){
     const playlistIdx = req.params.playlistIdx;
     const musicIdx = req.params.musicIdx;
     const userId = req.query.userId; // 스트리밍 기록(Streaming Table에 userId MusicIdx추가)에 필요한 userId. JWT로 대체 가능한가
+    const userIdFromJWT = req.verifiedToken.userId;
+
+    if(userIdFromJWT != userId) return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    else if(!userIdFromJWT) return res.send(errResponse(baseResponse.TOKEN_EMPTY));
 
     console.log(userId);
 
@@ -336,10 +361,35 @@ exports.playMusicInfo = async function(req,res){
 /**
  * API No. 27
  * API Name : TOP100차트 목록 조회 API
- * [GET] /chart/top-100
+ * [GET] /charts/top-100
  */
 exports.getChartInfo = async function (req,res){
-    const chartInfo = await musicProvider.getChartInfo();
+    /**
+     * QueryString: page,pageSize
+     */
+    const page = req.query.page;
+    const pageSize = req.query.pageSize;
+    console.log("page : " + page + " pageSize : " + pageSize);
+
+    const chartInfo = await musicProvider.getChartInfo(page,pageSize);
+
+    return res.send(response(baseResponse.SUCCESS,chartInfo));
+}
+/**
+ * API No. 27-1
+ * API Name : TOP100차트 목록 조회 API (cursor기반 페이지네이션)
+ * [GET] /charts/top-100/cursor
+ */
+exports.getChartInfoCursor = async function (req,res){
+    /**
+     * QueryString: page
+     */
+
+    const page = req.query.page;
+    const pageSize = 5;
+    console.log("page : " + page + " pageSize : " + pageSize);
+
+    const chartInfo = await musicProvider.getChartInfoCursor(page,pageSize);
 
     return res.send(response(baseResponse.SUCCESS,chartInfo));
 }

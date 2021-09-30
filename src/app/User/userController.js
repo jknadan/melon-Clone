@@ -3,11 +3,26 @@ const userProvider = require("../../app/User/userProvider");
 const userService = require("../../app/User/userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
+const {google} = require('googleapis');
+const googleKey = require('../../../config/google.json');
 
 
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 const {deleteUserById} = require("./userController");
+
+const googleConfig = {
+    clientId : googleKey.web.client_id,
+    clientSecret : googleKey.web.client_secret,
+    redirectUri : googleKey.web.redirect_uris[0]
+}
+
+const scopes = ['https://www.googleapis.com/auth/contacts.readonly'];
+const oauth2Client = new google.auth.OAuth2(
+    googleConfig.clientId,
+    googleConfig.clientSecret,
+    googleConfig.redirectUri
+);
 
 
 /**
@@ -344,7 +359,6 @@ exports.getFanList = async function(req,res){
 //---------------------------------------------------------------------------------//
 
 // TODO: After 로그인 인증 방법 (JWT)
-// 나중으로 미루니 우선 API순서에서 배제
 /**
  * API No. 4
  * API Name : 로그인 API
@@ -389,10 +403,48 @@ exports.patchUsers = async function (req, res) {
     }
 };
 
+exports.googleLogin = async function(req,res) {
 
+    const url = oauth2Client.generateAuthUrl({
+        access_type : 'offline',
+        scope: scopes
+    });
 
+    res.redirect(url);
 
+};
 
+function getGooglePlusApi(auth) {
+    return google.plus({version : 'v1',auth});
+}
+
+async function googleLogin(code){
+    const {tokens} = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    oauth2Client.on('tokens',(tokens)=>{
+        if(tokens.refresh_token) console.log("리프레시 토큰 : " + tokens.refresh_token);
+        console.log("액세스 토큰 : " + tokens.access_token);
+    });
+    const plus = getGooglePlusApi(oauth2Client);
+    const res = await plus.people.get({userId : 'me'});
+    console.log('Hello ' + res.data.displayName + '!' + res.data.id );
+    return res.data.displayName;
+}
+
+exports.googleLoginCallback = async function(req,res){
+
+    // const code = req.query.authorizationCode;
+    // const clientId = googleKey.web.client_id;
+    // const clientSecret = googleKey.web.client_secret;
+    // const redirectUri = googleKey.web.redirect_uris[0];
+    // const grantType = 'authorization_code';
+    console.log("callback 함수 실행됨")
+    const displayName = await googleLogin(req.query.code);
+    console.log(displayName);
+
+    res.redirect("http://localhost:3000");
+
+}
 
 
 

@@ -51,23 +51,16 @@ exports.updateMusicInfo = async function(userIdFromJWT,musicIdx,title,lyric){
                 musicIdxArr[i] = userMusicianCheck[i].musicIdx;
             }
             console.log("음악 검색 배열 값 :" + musicIdxArr);
-            console.log("mysql에서 받아오는 musicIdx의 타입 : " + typeof musicIdx);
             var musicCheck = musicIdxArr.includes(Number(musicIdx));
-            console.log("변형한 musicIdx의 타입 : " + typeof Number(musicIdx));
-            // 😢😢😢 mysql에서 받아오는 musicIdx값은 String인가봐.... 변수타입때문에 하루 종일 시간 날릴뻔.. Number()함수로 숫자 변환
             console.log("musicIdx값:" + musicIdx);
-            console.log("검색 결과 값 :" + musicCheck);
-
-
+            console.log("mysql에서 받아오는 musicIdx의 타입 : " + typeof musicIdx);
+            console.log("변형한 musicIdx의 타입 : " + typeof Number(musicIdx));
             if(!musicCheck){
                 return errResponse(baseResponse.MUSIC_MUSICID_NOT_ALLOWED);
             }
+            console.log("검색 결과 값 :" + musicCheck);
+            // 😢😢😢 mysql에서 받아오는 musicIdx값은 String인가봐.... 변수타입때문에 하루 종일 시간 날릴뻔.. Number()함수로 숫자 변환
 
-
-
-            // if(!(userMusicianCheck.includes(musicIdx))){
-            //     console.log("해당 음원은 뮤지션의 발매곡들 중 하나임")
-            // }
             const musicInfoResult = await musicDao.updateMusicInfo(connection,musicIdx,title,lyric);
             await connection.commit();
             connection.release();
@@ -91,41 +84,47 @@ exports.deleteMusic= async function(musicIdx,userIdFromJWT){
     const connection = await pool.getConnection(async (conn)=>conn);
 
     try{
-        const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
-        const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
-
-        if(userStatusCheck[0].status !== 4)
-            return errResponse(baseResponse.USERID_MUSICIANID_NOT_MATCH);
-
-        // 음악 소유 여부 체크 (아티스트가 소유한 musicIdx체크)
-        var musicIdxArr = Array.from({length:userMusicianCheck.length},()=>0);
-        for(let i =0;i<userMusicianCheck.length;i++){
-            musicIdxArr[i] = userMusicianCheck[i].musicIdx;
-        }
-        var musicCheck = musicIdxArr.includes(Number(musicIdx));
-
-        if(!musicCheck){
-            return errResponse(baseResponse.MUSIC_MUSICID_NOT_ALLOWED);
-        }
-
-        /*
-        console.log("musicIdx 배열 길이 :"+userMusicianCheck.length);
-        console.log("음악검색 배열 길이:"+musicIdxArr.length);
-        console.log("음악 검색 배열 값 :" + musicIdxArr);
-        console.log("mysql에서 받아오는 musicIdx의 타입 : " + typeof musicIdx);
-        console.log("변형한 musicIdx의 타입 : " + typeof Number(musicIdx));
-        // 😢😢😢 mysql에서 받아오는 musicIdx값은 String인가봐.... 변수타입때문에 하루 종일 시간 날릴뻔.. Number()함수로 숫자 변환
-        console.log("musicIdx값:" + musicIdx);
-        console.log("검색 결과 값 :" + musicCheck);
-        */
-
-
         await connection.beginTransaction();
-        const deleteMusicResult = await musicDao.deleteMusic(connection,musicIdx);
-        await connection.commit();
-        connection.release();
 
-        return deleteMusicResult;
+
+        const checkMusic = await musicProvider.getMusicInfo(musicIdx);
+
+        // console.log(checkMusic[0])
+        // [] 이라면 null이 아닌가?
+        if(checkMusic[0] === undefined) {
+            return response(baseResponse.CONTENT_RESULT_NOT_EXIST)
+        }else{
+            const userStatusCheck = await userProvider.getUserInfo(userIdFromJWT);
+            const userMusicianCheck = await userProvider.getMusicianCheck(userIdFromJWT);
+
+            if(userStatusCheck[0].status !== 4)
+                return errResponse(baseResponse.USERID_MUSICIANID_NOT_MATCH);
+
+            // 음악 소유 여부 체크 (아티스트가 소유한 musicIdx체크)
+            console.log("musicIdx 배열 길이 :"+userMusicianCheck.length);
+            var musicIdxArr = Array.from({length:userMusicianCheck.length},()=>0);
+            console.log("음악검색 배열 길이:"+musicIdxArr.length);
+            for(let i =0;i<userMusicianCheck.length;i++){
+                musicIdxArr[i] = userMusicianCheck[i].musicIdx;
+            }
+            console.log("음악 검색 배열 값 :" + musicIdxArr);
+            var musicCheck = musicIdxArr.includes(Number(musicIdx));
+            console.log("musicIdx값:" + musicIdx);
+            console.log("mysql에서 받아오는 musicIdx의 타입 : " + typeof musicIdx);
+            console.log("변형한 musicIdx의 타입 : " + typeof Number(musicIdx));
+
+            if(!musicCheck){
+                return errResponse(baseResponse.MUSIC_MUSICID_NOT_ALLOWED);
+            }
+            console.log("검색 결과 값 :" + musicCheck);
+
+            const deleteMusicResult = await musicDao.deleteMusic(connection,musicIdx);
+            await connection.commit();
+            connection.release();
+
+            return response(baseResponse.SUCCESS);
+        }
+
 
     }catch (err){
         logger.error(`App - editUser Service error\n: ${err.message}`);
@@ -184,7 +183,7 @@ exports.updateComment = async function(userId,commentIdx,contents){
 
 }
 
-exports.insertMusicPL = async function(musicIdx,playlistIdx){
+exports.insertMusicPL = async function(musicIdx,playlistIdx,userId){
 
     const connection = await pool.getConnection(async (conn)=>conn);
 
@@ -193,8 +192,8 @@ exports.insertMusicPL = async function(musicIdx,playlistIdx){
 
         //Vaildation
 
-        // 플레이리스트 중복 체크
-        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
+        // 플레이리스트 존재 체크
+        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx,userId);
         console.log(isExistPlaylist[0]);
 
         if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
@@ -228,6 +227,7 @@ exports.addMusicLike = async function(userId,musicIdx){
 
 try{
     await connection.beginTransaction();
+    // 이미 좋아요를 눌렀는지 확인 여부
     const isExistCheck = await musicProvider.getMusicLikeList(userId,musicIdx);
     console.log(isExistCheck);
     if(isExistCheck !== undefined){

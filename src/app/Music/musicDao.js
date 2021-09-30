@@ -173,15 +173,15 @@ async function checkMusicPlaylist(connection,musicIdx,playlistIdx) {
     return checkResultRows[0];
 
 }
-
-async function checkPlaylist(connection,playlistIdx) {
+// 특정 유저가 개인으로 생성한 플리. DJ 등 공개적으로 설정한 플리들은 따로 설정하자
+async function checkPlaylist(connection,playlistIdx,userId) {
     const checkPlaylistQuery = `
     select *
     from PlayLsit 
-    where playListIdx = ?;
+    where playListIdx = ? AND userId = ?;
     ;`;
 
-    const [checkResultRows] = await connection.query(checkPlaylistQuery,playlistIdx);
+    const [checkResultRows] = await connection.query(checkPlaylistQuery,[playlistIdx,userId]);
     return checkResultRows;
 }
 
@@ -342,18 +342,41 @@ on duplicate key update Chart_TOP100.musicIdx= B.musicIdx,
     return updateQuery;
 }
 
-async function getChartInfo(connection) {
+async function getChartInfo(connection,start,pageSize) {
     const selectChartInfoQuery = `
     select ranking,Chart_TOP100.difference as '순위 변동',A.albumImgUri,M.title,S.musicianName from Chart_TOP100
 inner join Music M on Chart_TOP100.musicIdx = M.musicIdx
 inner join Singer S on M.musicianIdx = S.musicianIdx
 inner join Album A on M.albumIdx = A.albumIdx
 order by ranking
-limit 100;
+limit ?,?;
     `;
 
-    const [chartRows] = await connection.query(selectChartInfoQuery);
+    const [chartRows] = await connection.query(selectChartInfoQuery,[start,pageSize]);
     return chartRows;
+}
+
+async function getChartInfoCursor(connection,start,pageSize) {
+    const selectChartInfoQuery = `
+    select ranking,Chart_TOP100.difference as '순위 변동',A.albumImgUri,M.title,S.musicianName from Chart_TOP100
+inner join Music M on Chart_TOP100.musicIdx = M.musicIdx
+inner join Singer S on M.musicianIdx = S.musicianIdx
+inner join Album A on M.albumIdx = A.albumIdx
+having ranking > ?
+order by ranking asc
+limit ?;
+    ;`;
+
+    const [chartRows] = await connection.query(selectChartInfoQuery,[start,pageSize]);
+    return chartRows;
+}
+
+async function chartLength(connection) {
+    const selectChartLength = `
+    select count(musicIdx) as cnt from Chart_TOP100;
+    `;
+    const [chartLength] = await connection.query(selectChartLength);
+    return chartLength
 }
 
 
@@ -383,6 +406,8 @@ module.exports = {
     getPlayMusicInfo,
     insertMusicHistory,
     updateMusicRanking,
-    getChartInfo
+    getChartInfo,
+    chartLength,
+    getChartInfoCursor
 
 };

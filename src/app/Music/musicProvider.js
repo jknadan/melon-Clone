@@ -87,9 +87,9 @@ exports.getMusicPlaylist = async function(musicIdx,playlistIdx){
     return checkResult;
 }
 
-exports.checkPlaylist = async function(playlistIdx){
+exports.checkPlaylist = async function(playlistIdx,userId){
     const connection = await pool.getConnection(async (conn)=>conn);
-    const checkResult = await musicDao.checkPlaylist(connection,playlistIdx);
+    const checkResult = await musicDao.checkPlaylist(connection,playlistIdx,userId);
     connection.release();
 
     return checkResult;
@@ -154,10 +154,11 @@ exports.getTimeline = async function(musicianIdx){
 
 }
 
-exports.getPlaylistInfo = async function(playlistIdx){
+exports.getPlaylistInfo = async function(playlistIdx,userId){
 
     // 플레이리스트 존재 체크
-    const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
+    const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx,userId);
+    console.log(typeof userId)
     // console.log(isExistPlaylist[0]);
     if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
 
@@ -182,7 +183,7 @@ exports.getPlayMusicInfo = async function(playlistIdx,musicIdx,userId){
 
         // 플레이리스트 존재 체크
         // 주석은 설명이 필요할 거 같은 코드에 주석을 하자. 한줄에 최대한 깔끔하고 간결.
-        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx);
+        const isExistPlaylist = await musicProvider.checkPlaylist(playlistIdx,userId);
         console.log(isExistPlaylist[0]);
         if(isExistPlaylist[0] === undefined) return errResponse(baseResponse.CONTENT_RESULT_NOT_EXIST);
 
@@ -214,11 +215,69 @@ exports.getPlayMusicInfo = async function(playlistIdx,musicIdx,userId){
 
 }
 
-exports.getChartInfo = async function(){
+exports.getChartInfo = async function(page,pageSize){
     const connection = await pool.getConnection(async (conn)=>conn);
 
-    const getChartResult = await musicDao.getChartInfo(connection);
-    return getChartResult;
+    try{
+        var start = 0;
+        // 차트 길이를 알기 위한 임시 쿼리
+        const tempChartResult = await musicDao.chartLength(connection);
+        if(page > Math.round(tempChartResult[0].cnt/pageSize)){
+            page = Math.round(tempChartResult[0].cnt/pageSize); // 마지막 페이지 이상을 넘어서면 가장 마지막 페이지를 보여주도록 설계
+        }
+        if(page<=0){
+            page = 1;
+        }
+        else{
+            start = (page-1) * pageSize;
+        }
+
+        console.log(page)
+        console.log(tempChartResult[0].cnt/pageSize);
+
+        console.log("start : " + start + " pageSize : " + pageSize);
+        // mySql에서 Limit 는 다른 조건들과 달리 String의 데이터를 읽지 못한다. 그래서 Number()로 형변환을 해주어서 넣어줌
+        const getChartResult = await musicDao.getChartInfo(connection,Number(start),Number(pageSize));
+        return getChartResult;
+    }catch (err) {
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
+
+
+}
+
+exports.getChartInfoCursor = async function(page,pageSize){
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    try{
+        var start = 0;
+        // 차트 길이를 알기 위한 임시 쿼리
+        const tempChartResult = await musicDao.chartLength(connection);
+        if(page > Math.round(tempChartResult[0].cnt/pageSize)){
+            page = Math.round(tempChartResult[0].cnt/pageSize); // 마지막 페이지 이상을 넘어서면 가장 마지막 페이지를 보여주도록 설계
+        }
+        if(page<=0){
+            page = 1;
+        }
+        else{
+            start = (page-1) * pageSize;
+        }
+
+        console.log(page)
+        console.log(tempChartResult[0].cnt/pageSize);
+
+        console.log("start : " + start + " pageSize : " + pageSize);
+        // mySql에서 Limit 는 다른 조건들과 달리 String의 데이터를 읽지 못한다. 그래서 Number()로 형변환을 해주어서 넣어줌
+        const getChartResult = await musicDao.getChartInfoCursor(connection,Number(start),Number(pageSize));
+        return getChartResult;
+    }catch (err) {
+        logger.error(`App - editUser Service error\n: ${err.message}`);
+        if(connection.rollback()) console.log("쿼리 rollback함");
+        return errResponse(baseResponse.DB_ERROR);
+    }
+
 
 }
 
