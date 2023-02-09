@@ -6,5 +6,5 @@ const port = 3000;
 express().listen(port);
 logger.info(`${process.env.NODE_ENV} - API Server Start At Port ${port}`);
 
-// scheduler.js를 모듈로 exports했으니까 여기서 실행해줘야지
+// scheduler.js를 모듈로 exports 했으니까 여기서 실행해줘야지
 scheduler.schedule();
